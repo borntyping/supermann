@@ -4,6 +4,19 @@ Supervisor event hierarchy
 http://supervisord.org/events.html
 """
 
+from __future__ import print_function
+
+import sys
+
+
+def build_subclass_dict(base):
+    subclasses = {cls.__name__: cls for cls in base.__subclasses__()}
+
+    for name, cls in subclasses.items():
+        subclasses.update(build_subclass_dict(cls))
+
+    return subclasses
+
 
 class PayloadAttribute(object):
     def __init__(self, name):
@@ -14,18 +27,13 @@ class PayloadAttribute(object):
 
 
 class Event(object):
-    subclasses = dict()
 
     @classmethod
     def create(cls, headers, payload):
-        if headers['eventname'] in cls.subclasses:
-            cls = cls.subclasses[headers['eventname']]
+        subclasses = build_subclass_dict(cls)
+        if headers['eventname'] in subclasses:
+            cls = subclasses[headers['eventname']]
         return cls(headers, payload)
-
-    @classmethod
-    def register(cls, subclass):
-        cls.subclasses[subclass.__name__.upper()] = subclass
-        return subclass
 
     def __init__(self, headers, payload):
         self.headers = headers
@@ -51,16 +59,13 @@ class Tick(Event):
     when = PayloadAttribute('when')
 
 
-@Event.register
 class Tick_5(Tick):
     frequency = 5
 
 
-@Event.register
 class Tick_60(Tick):
     frequency = 60
 
 
-@Event.register
 class Tick_3600(Tick):
     frequency = 3600

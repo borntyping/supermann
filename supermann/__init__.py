@@ -34,13 +34,13 @@ class EventListener(object):
         self.ready()
         headers = self.headers(sys.stdin.readline())
         payload = self.headers(sys.stdin.read(int(headers.pop('len'))))
-        return header, payload
+        return headers, payload
 
     def run(self):
         """Wait for events from Supervisor and pass them to event()"""
         while True:
-            header, payload = self.wait()
-            self.event(header, payload)
+            headers, payload = self.wait()
+            self.event(headers, payload)
 
     def event(self):
         raise NotImplementedError
@@ -48,10 +48,6 @@ class EventListener(object):
 
 class Supermann(EventListener):
     """The Supermann event listener"""
-
-    def run(self):
-        print("Starting Supermann...", file=sys.stderr)
-        super(self, Supermann).run()
 
     def event(self, headers, payload):
         event = supermann.events.Event.create(headers, payload)
@@ -65,4 +61,5 @@ class Supermann(EventListener):
 
 
 def main():
+    print("Starting Supermann...", file=sys.stderr)
     Supermann().run()
