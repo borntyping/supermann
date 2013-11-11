@@ -1,4 +1,4 @@
 supermann
 =========
 
-A supervisor event listener for riemann.io
+A [supervisor](http://supervisord.org/) event listener for [riemann](http://riemann.io/).
