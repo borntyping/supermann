@@ -49,23 +49,23 @@ class Event(object):
             ' '.join([':'.join(item) for item in self.payload.items()]))
 
 
-class Process_State(Event):
+class PROCESS_STATE(Event):
     name = PayloadAttribute('processname')
     group = PayloadAttribute('groupname')
     from_state = PayloadAttribute('from_state')
 
 
-class Tick(Event):
+class TICK(Event):
     when = PayloadAttribute('when')
 
 
-class Tick_5(Tick):
+class TICK_5(TICK):
     frequency = 5
 
 
-class Tick_60(Tick):
+class TICK_60(TICK):
     frequency = 60
 
 
-class Tick_3600(Tick):
+class TICK_3600(TICK):
     frequency = 3600

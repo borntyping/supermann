@@ -52,8 +52,9 @@ class Supermann(EventListener):
     def event(self, headers, payload):
         event = supermann.events.Event.create(headers, payload)
 
-        if isinstance(event, supermann.events.Tick):
-            print("Tick at {tick.when} (every {tick.frequency} second) {tick!r}".format(tick=tick), file=sys.stderr)
+        if isinstance(event, supermann.events.TICK):
+            print("Tick at {0} (every {1} seconds) {2!r}".format(
+                event.when, event.frequency, event), file=sys.stderr)
         else:
             print("Recived {event!r}".format(event=event), file=sys.stderr)
 
