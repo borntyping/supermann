@@ -27,7 +27,6 @@ class Event(object):
     type will use the UnknownEvent subclass."""
 
     SUBCLASSES = dict()
-    DEFAULT_SUBCLASS = UnknownEvent
 
     @classmethod
     def register(cls, subcls):
@@ -40,7 +39,7 @@ class Event(object):
         try:
             cls = cls.SUBCLASSES[headers['eventname']]
         except KeyError:
-            cls = cls.DEFAULT_SUBCLASS
+            cls = UnknownEvent
         return object.__new__(cls, headers, payload)
 
     def __init__(self, headers, payload):
