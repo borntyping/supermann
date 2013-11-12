@@ -13,7 +13,7 @@ setuptools.setup(
 
     url = "https://github.com/borntyping/supermann",
     description = "A Supervisor event listener for Riemann",
-    long_description = open('README.md').read(),
+    long_description = open('README.rst').read(),
 
     packages = setuptools.find_packages(),
 

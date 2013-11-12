@@ -20,8 +20,10 @@ class Supermann(object):
 
         # As stdin/stdout are used to communicate with Supervisor,
         # reserve them by replacing the sys attributes with None
-        if reserve_stdin: sys.stdin = None
-        if reserve_stdout: sys.stdout = None
+        if reserve_stdin:
+            sys.stdin = None
+        if reserve_stdout:
+            sys.stdout = None
 
     def run(self):
         """Wait for events from Supervisor and pass them to recive()"""

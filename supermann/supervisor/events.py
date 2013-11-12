@@ -40,7 +40,7 @@ class Event(object):
             cls = cls.SUBCLASSES[headers['eventname']]
         except KeyError:
             cls = UnknownEvent
-        return object.__new__(cls, headers, payload)
+        return super(Event, cls).__new__(cls)
 
     def __init__(self, headers, payload):
         self.headers = headers
@@ -59,7 +59,7 @@ class UnknownEvent(Event):
 
 
 @Event.register
-class PROCESS_STATE(Event):
+class Process_State(Event):
     name = PayloadAttribute('processname')
     group = PayloadAttribute('groupname')
     from_state = PayloadAttribute('from_state')
@@ -70,15 +70,15 @@ class Tick(Event):
 
 
 @Event.register
-class TICK_5(Tick):
+class Tick_5(Tick):
     frequency = 5
 
 
 @Event.register
-class TICK_60(Tick):
+class Tick_60(Tick):
     frequency = 60
 
 
 @Event.register
-class TICK_3600(Tick):
+class Tick_3600(Tick):
     frequency = 3600
