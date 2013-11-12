@@ -34,7 +34,7 @@ class Supermann(object):
 
     def recive(self, event):
         """Handle each event from supervisor"""
-        if isinstance(event, supermann.supervisor.events.Tick):
+        if isinstance(event, supermann.supervisor.events.TICK):
             print("Tick at {0} (every {1} seconds)".format(
                 event.when, event.frequency), file=sys.stderr)
         else:

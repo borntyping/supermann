@@ -12,8 +12,9 @@ from __future__ import absolute_import, unicode_literals
 class PayloadAttribute(object):
     """An attribute that returns a value from the instance's .payload dict"""
 
-    def __init__(self, name):
+    def __init__(self, name, function=lambda obj: obj):
         self.name = name
+        self.function = function
 
     def __get__(self, instance, owner):
         return instance.payload[self.name]
@@ -31,7 +32,7 @@ class Event(object):
     @classmethod
     def register(cls, subcls):
         """Registers a subclass that can be used when creating new Events"""
-        cls.SUBCLASSES[subcls.__name__.upper()] = subcls
+        cls.SUBCLASSES[subcls.__name__] = subcls
         return subcls
 
     def __new__(cls, headers, payload):
@@ -58,27 +59,66 @@ class UnknownEvent(Event):
     pass
 
 
-@Event.register
-class Process_State(Event):
+class PROCESS_STATE(Event):
     name = PayloadAttribute('processname')
     group = PayloadAttribute('groupname')
     from_state = PayloadAttribute('from_state')
 
 
-class Tick(Event):
+@Event.register
+class PROCESS_STATE_STARTING(PROCESS_STATE):
+    tries = PayloadAttribute('tries', int)
+
+
+@Event.register
+class PROCESS_STATE_RUNNING(PROCESS_STATE):
+    pass
+
+
+@Event.register
+class PROCESS_STATE_BACKOFF(PROCESS_STATE):
+    pass
+
+
+@Event.register
+class PROCESS_STATE_STOPPING(PROCESS_STATE):
+    pass
+
+
+@Event.register
+class PROCESS_STATE_EXITED(PROCESS_STATE):
+    pass
+
+
+@Event.register
+class PROCESS_STATE_STOPPED(PROCESS_STATE):
+    pass
+
+
+@Event.register
+class PROCESS_STATE_FATAL(PROCESS_STATE):
+    pass
+
+
+@Event.register
+class PROCESS_STATE_UNKNOWN(PROCESS_STATE):
+    pass
+
+
+class TICK(Event):
     when = PayloadAttribute('when')
 
 
 @Event.register
-class Tick_5(Tick):
+class TICK_5(TICK):
     frequency = 5
 
 
 @Event.register
-class Tick_60(Tick):
+class TICK_60(TICK):
     frequency = 60
 
 
 @Event.register
-class Tick_3600(Tick):
+class TICK_3600(TICK):
     frequency = 3600
