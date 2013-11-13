@@ -6,18 +6,30 @@ http://supervisord.org/events.html
 Event class names are capitalised to match the supervisor documentation.
 """
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals, print_function
+
+import sys
 
 
-class PayloadAttribute(object):
-    """An attribute that returns a value from the instance's .payload dict"""
-
-    def __init__(self, name, function=lambda obj: obj):
+class DictAttribute(object):
+    def __init__(self, name, func=None, attribute=None):
         self.name = name
-        self.function = function
+        self.func = func
+        self.attribute = attribute
 
     def __get__(self, instance, owner):
-        return instance.payload[self.name]
+        value = getattr(instance, self.attribute)[self.name]
+        return value if self.func is None else self.func(value)
+
+
+class PayloadAttribute(DictAttribute):
+    def __init__(self, name, func=None):
+        super(PayloadAttribute, self).__init__(name, func, 'payload')
+
+
+class HeaderAttribute(DictAttribute):
+    def __init__(self, name, func=None):
+        super(HeaderAttribute, self).__init__(name, func, 'headers')
 
 
 class Event(object):
@@ -50,8 +62,25 @@ class Event(object):
             self.headers['eventname'],
             ' '.join([':'.join(item) for item in self.payload.items()]))
 
+    ver = HeaderAttribute('ver', int)
+    server = HeaderAttribute('server')
+    serial = HeaderAttribute('serial', int)
+    pool = HeaderAttribute('pool')
+    poolserial = HeaderAttribute('poolserial')
+
+
+class ProcessStateMetaclass(type):
+    """Creates the state class attribute on PROCESS_STATE subclasses"""
+
+    def __new__(cls, name, bases, attributes):
+        if name != 'PROCESS_STATE':
+            attributes['state'] = name.split('_')[-1].lower()
+        return type.__new__(cls, name, bases, attributes)
+
 
 class PROCESS_STATE(Event):
+    __metaclass__ = ProcessStateMetaclass
+
     name = PayloadAttribute('processname')
     group = PayloadAttribute('groupname')
     from_state = PayloadAttribute('from_state')
@@ -59,59 +88,67 @@ class PROCESS_STATE(Event):
 
 @Event.register
 class PROCESS_STATE_STARTING(PROCESS_STATE):
-    state = 'starting'
     tries = PayloadAttribute('tries', int)
 
 
 @Event.register
 class PROCESS_STATE_RUNNING(PROCESS_STATE):
-    state = 'running'
+    pass
 
 
 @Event.register
 class PROCESS_STATE_BACKOFF(PROCESS_STATE):
-    state = 'backoff'
+    pass
 
 
 @Event.register
 class PROCESS_STATE_STOPPING(PROCESS_STATE):
-    state = 'stopping'
+    pass
 
 
 @Event.register
 class PROCESS_STATE_EXITED(PROCESS_STATE):
-    state = 'exited'
+    pass
 
 
 @Event.register
 class PROCESS_STATE_STOPPED(PROCESS_STATE):
-    state = 'stopped'
+    pass
 
 
 @Event.register
 class PROCESS_STATE_FATAL(PROCESS_STATE):
-    state = 'fatal'
+    pass
 
 
 @Event.register
 class PROCESS_STATE_UNKNOWN(PROCESS_STATE):
-    state = 'unknown'
+    pass
+
+
+class TickMetaclass(type):
+    """Creates the frequency class attribute on TICK subclasses"""
+
+    def __new__(cls, name, bases, attributes):
+        if name != 'TICK':
+            attributes['frequency'] = int(name.split('_')[-1])
+        return type.__new__(cls, name, bases, attributes)
 
 
 class TICK(Event):
-    when = PayloadAttribute('when')
+    when = PayloadAttribute('when', int)
 
 
 @Event.register
 class TICK_5(TICK):
-    frequency = 5
+    pass
 
 
 @Event.register
 class TICK_60(TICK):
-    frequency = 60
+    pass
 
 
 @Event.register
 class TICK_3600(TICK):
-    frequency = 3600
+    pass
