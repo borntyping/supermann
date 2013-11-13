@@ -24,8 +24,8 @@ class Event(object):
     """A Supervisor event
 
     This is an abstract class, and creating instances of Event will create an
-    instance of a subclass when possible (see __new__()). Events of an unknown
-    type will use the UnknownEvent subclass."""
+    instance of a subclass when possible (see __new__()). Instances of Event
+    will only be created when the event type is unknown."""
 
     SUBCLASSES = dict()
 
@@ -37,10 +37,8 @@ class Event(object):
 
     def __new__(cls, headers, payload):
         """If a subclass for this event type exists, use that instead"""
-        try:
+        if headers['eventname'] in cls.SUBCLASSES:
             cls = cls.SUBCLASSES[headers['eventname']]
-        except KeyError:
-            cls = UnknownEvent
         return super(Event, cls).__new__(cls)
 
     def __init__(self, headers, payload):
@@ -49,14 +47,8 @@ class Event(object):
 
     def __repr__(self):
         return "<{0} {1}>".format(
-            self.headers['eventname'], self.__repr_payload__())
-
-    def __repr_payload__(self):
-        return ' '.join([':'.join(item) for item in self.payload.items()])
-
-
-class UnknownEvent(Event):
-    pass
+            self.headers['eventname'],
+            ' '.join([':'.join(item) for item in self.payload.items()]))
 
 
 class PROCESS_STATE(Event):
