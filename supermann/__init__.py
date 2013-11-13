@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, unicode_literals, print_function
 
+import socket
 import sys
 
 import supermann.riemann.client
@@ -35,21 +36,22 @@ class Supermann(object):
 
     def recive(self, event):
         """Handle each event from supervisor"""
-        if isinstance(event, supermann.supervisor.events.TICK):
-            print("Tick at {0} (every {1} seconds)".format(
-                event.when, event.frequency), file=sys.stderr)
-        else:
-            print("Recived {event!r}".format(event=event), file=sys.stderr)
-
-
-def test(value=0):
-    with supermann.riemann.client.UDPClient('localhost', 5555) as client:
-        client.send_event(
-            service='supermann',
-            description="Supermann test",
-            tags=['supermann', 'test'],
-            state='ok',
-            metric_f=value)
+        with supermann.riemann.client.UDPClient('localhost', 5555) as client:
+            if isinstance(event, supermann.supervisor.events.TICK):
+                event = client.send_event(
+                    host=socket.gethostname(),
+                    service='supermann',
+                    state='ok',
+                    description="Supervisor tick",
+                    tags=['supermann', 'supervisor', 'tick'])
+            elif isinstance(event, supermann.supervisor.events.PROCESS_STATE):
+                event = client.send_event(
+                    host=socket.gethostname(),
+                    service=event.name,
+                    state=event.state,
+                    description="Process state changed",
+                    tags=['supermann', 'supervisor', 'process_state'])
+            print(str(event.obj), file=sys.stderr)
 
 
 def main():

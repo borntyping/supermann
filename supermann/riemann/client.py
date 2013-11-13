@@ -52,13 +52,14 @@ class Client(object):
         self.send_event(data)
 
     def send_event(self, **data):
-        self.send_message(events=[Event(**data)])
+        return self.send_message(events=[Event(**data)])
 
     def send_message(self, **data):
-        self.send_object(Msg(**data))
+        return self.send_object(Msg(**data))
 
     def send_object(self, obj):
         self.write(obj.obj.SerializeToString())
+        return obj
 
 
 class UDPClient(Client):

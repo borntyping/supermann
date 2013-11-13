@@ -59,42 +59,43 @@ class PROCESS_STATE(Event):
 
 @Event.register
 class PROCESS_STATE_STARTING(PROCESS_STATE):
+    state = 'starting'
     tries = PayloadAttribute('tries', int)
 
 
 @Event.register
 class PROCESS_STATE_RUNNING(PROCESS_STATE):
-    pass
+    state = 'running'
 
 
 @Event.register
 class PROCESS_STATE_BACKOFF(PROCESS_STATE):
-    pass
+    state = 'backoff'
 
 
 @Event.register
 class PROCESS_STATE_STOPPING(PROCESS_STATE):
-    pass
+    state = 'stopping'
 
 
 @Event.register
 class PROCESS_STATE_EXITED(PROCESS_STATE):
-    pass
+    state = 'exited'
 
 
 @Event.register
 class PROCESS_STATE_STOPPED(PROCESS_STATE):
-    pass
+    state = 'stopped'
 
 
 @Event.register
 class PROCESS_STATE_FATAL(PROCESS_STATE):
-    pass
+    state = 'fatal'
 
 
 @Event.register
 class PROCESS_STATE_UNKNOWN(PROCESS_STATE):
-    pass
+    state = 'unknown'
 
 
 class TICK(Event):
