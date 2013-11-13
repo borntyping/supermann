@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals, print_function
 
 import sys
 
+import supermann.riemann.client
 import supermann.supervisor.events
 import supermann.supervisor.listener
 
@@ -39,6 +40,16 @@ class Supermann(object):
                 event.when, event.frequency), file=sys.stderr)
         else:
             print("Recived {event!r}".format(event=event), file=sys.stderr)
+
+
+def test(value=0):
+    with supermann.riemann.client.UDPClient('localhost', 5555) as client:
+        client.send_event(
+            service='supermann',
+            description="Supermann test",
+            tags=['supermann', 'test'],
+            state='ok',
+            metric_f=value)
 
 
 def main():

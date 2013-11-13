@@ -1,6 +1,6 @@
-"""Supermann package metadata"""
+#!/usr/bin/env python2
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import unicode_literals
 
 import setuptools
 
@@ -18,7 +18,7 @@ setuptools.setup(
     packages = setuptools.find_packages(),
 
     install_requires = [
-        'supervisor'
+        'protobuf==2.5.0'
     ],
 
     entry_points = {
