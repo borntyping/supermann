@@ -25,7 +25,7 @@ class EventListener(object):
 
     def result(self, result):
         """Writes and flushes a result message to stdout"""
-        self.stdout.write('RESULT {}\n{}'.format(len(result), result))
+        self.stdout.write('RESULT {0}\n{1}'.format(len(result), result))
         self.stdout.flush()
 
     def ok(self):
