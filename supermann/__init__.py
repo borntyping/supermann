@@ -38,22 +38,22 @@ class Supermann(object):
         """Handle each event from supervisor"""
         with supermann.riemann.client.UDPClient('localhost', 5555) as client:
             if isinstance(event, supermann.supervisor.events.TICK):
-                event = client.send_event(
-                    time=int(event.when),
-                    host=socket.gethostname(),
-                    service='supervisor',
-                    state='ok',
-                    description="Supervisor tick",
-                    tags=['supermann', 'supervisor', 'tick'],
-                    metric_f=event.serial)
+                event = client << {
+                    'host': socket.gethostname(),
+                    'service': 'supervisor',
+                    'state': 'ok',
+                    'time': event.when,
+                    'metric_f': event.serial,
+                    'tags': ['supermann', 'supervisor', 'tick']
+                }
             elif isinstance(event, supermann.supervisor.events.PROCESS_STATE):
-                event = client.send_event(
-                    host=socket.gethostname(),
-                    service=event.name,
-                    state=event.state,
-                    description="Process state changed",
-                    tags=['supermann', 'supervisor', 'state'])
-            print(str(event.obj).strip(), file=sys.stderr)
+                event = client << {
+                    'host': socket.gethostname(),
+                    'service': event.name,
+                    'state': event.state,
+                    'tags': ['supermann', 'supervisor', 'process_state']
+                }
+            print(str(event).strip(), file=sys.stderr)
 
 
 def main():

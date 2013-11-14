@@ -45,7 +45,7 @@ class TestEventTypes(object):
 
 class TestEventClasses(object):
     def test_tick_when_attribute(self, tick_5):
-        assert tick_5.when == tick_5.payload['when'] == "1384261590"
+        assert tick_5.when == int(tick_5.payload['when']) == 1384261590
 
     def test_process_state_starting(self, process_state_starting):
         assert process_state_starting.from_state == 'STOPPED'

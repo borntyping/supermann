@@ -8,8 +8,6 @@ Event class names are capitalised to match the supervisor documentation.
 
 from __future__ import absolute_import, unicode_literals, print_function
 
-import sys
-
 
 class DictAttribute(object):
     def __init__(self, name, func=None, attribute=None):
