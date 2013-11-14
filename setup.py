@@ -1,8 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.6
 
 from __future__ import unicode_literals
 
 import setuptools
+import sys
 
 setuptools.setup(
     name = "supermann",
@@ -23,7 +24,8 @@ setuptools.setup(
 
     entry_points = {
         'console_scripts': [
-            'supermann = supermann:main'
+            'supermann = supermann:main',
+            'supermann-{0}.{1} = supermann:main'.format(*sys.version_info)
         ]
     },
 
@@ -35,6 +37,7 @@ setuptools.setup(
         'Operating System :: Unix',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Topic :: System :: Logging',
         'Topic :: System :: Monitoring',
