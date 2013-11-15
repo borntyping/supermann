@@ -17,6 +17,10 @@ can be rebuilt using the most recent definition with::
     wget https://github.com/aphyr/riemann-java-client/blob/master/src/main/proto/riemann/proto.proto
     protoc --python_out=supermann/riemann/ riemann.proto
 
+Supermann requires the ``psutil`` library, which uses C extensions. Installing
+this package through ``pip`` will require build tools, though a built version of
+the package should exist in your distributions repositories.
+
 Licence
 -------
 

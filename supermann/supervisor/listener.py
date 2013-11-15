@@ -10,9 +10,17 @@ import supermann.supervisor.events
 class EventListener(object):
     """A basic Supervisor event listener"""
 
-    def __init__(self, stdin=sys.stdin, stdout=sys.stdout):
+    def __init__(self, stdin=sys.stdin, stdout=sys.stdout,
+                 reserve_stdin=True, reserve_stdout=True):
         self.stdin = stdin
         self.stdout = stdout
+
+        # As stdin/stdout are used to communicate with Supervisor,
+        # reserve them by replacing the sys attributes with None
+        if reserve_stdin:
+            sys.stdin = None
+        if reserve_stdout:
+            sys.stdout = None
 
     def parse(self, line):
         """Parses a Supervisor header or payload"""

@@ -7,7 +7,7 @@ import sys
 
 setuptools.setup(
     name = "supermann",
-    version = '0.1.0',
+    version = '0.2.0',
 
     author = "Sam Clements",
     author_email = "sam.clements@datasift.com",
@@ -19,7 +19,8 @@ setuptools.setup(
     packages = setuptools.find_packages(),
 
     install_requires = [
-        'protobuf==2.5.0'
+        'protobuf==2.5.0',
+        'psutil==1.1.3',
     ],
 
     entry_points = {
