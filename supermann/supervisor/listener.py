@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import logging
 import sys
 
 import supermann.supervisor.events
@@ -12,6 +13,10 @@ class EventListener(object):
 
     def __init__(self, stdin=sys.stdin, stdout=sys.stdout,
                  reserve_stdin=True, reserve_stdout=True):
+        self.log = logging.getLogger(__name__)
+
+        # STDIN and STDOUT are referenced by the object, so that they are easy
+        # to test, and so the references in sys can be removed (see below)
         self.stdin = stdin
         self.stdout = stdout
 
@@ -19,8 +24,10 @@ class EventListener(object):
         # reserve them by replacing the sys attributes with None
         if reserve_stdin:
             sys.stdin = None
+            self.log.warn("Supervisor listener has reserved STDIN")
         if reserve_stdout:
             sys.stdout = None
+            self.log.warn("Supervisor listener has reserved STDOUT")
 
     def parse(self, line):
         """Parses a Supervisor header or payload"""
@@ -47,4 +54,5 @@ class EventListener(object):
         self.ready()
         headers = self.parse(self.stdin.readline())
         payload = self.parse(self.stdin.read(int(headers.pop('len'))))
+        self.log.debug("Received %s from supervisor", headers['eventname'])
         return supermann.supervisor.events.Event(headers, payload)

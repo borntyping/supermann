@@ -7,7 +7,7 @@ import sys
 
 setuptools.setup(
     name = "supermann",
-    version = '0.2.0',
+    version = '0.3.0',
 
     author = "Sam Clements",
     author_email = "sam.clements@datasift.com",
@@ -19,14 +19,15 @@ setuptools.setup(
     packages = setuptools.find_packages(),
 
     install_requires = [
+        'argparse==1.2.1',
         'protobuf==2.5.0',
         'psutil==1.1.3',
     ],
 
     entry_points = {
         'console_scripts': [
-            'supermann = supermann:main',
-            'supermann-{0}.{1} = supermann:main'.format(*sys.version_info)
+            'supermann = supermann.command:main',
+            'supermann-{0}.{1} = supermann.command:main'.format(*sys.version_info)
         ]
     },
 

@@ -1,9 +1,9 @@
 """Riemann protocol buffer client"""
 
-from __future__ import absolute_import, unicode_literals, print_function
+from __future__ import absolute_import, unicode_literals
 
+import logging
 import socket
-import sys
 
 import supermann.riemann.riemann_pb2
 
@@ -31,6 +31,8 @@ class Client(object):
         return create_pb_object(supermann.riemann.riemann_pb2.Event, data)
 
     def __init__(self, host, port):
+        self.log = logging.getLogger(__name__)
+        self.log.info("Sending events to Riemann at %s:%s", host, port)
         self.host = host
         self.port = port
 

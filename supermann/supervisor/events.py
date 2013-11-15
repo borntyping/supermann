@@ -72,7 +72,7 @@ class ProcessStateMetaclass(type):
 
     def __new__(cls, name, bases, attributes):
         if name != 'PROCESS_STATE':
-            attributes['state'] = name.split('_')[-1].lower()
+            attributes['state'] = name.split('_')[-1]
         return type.__new__(cls, name, bases, attributes)
 
 
