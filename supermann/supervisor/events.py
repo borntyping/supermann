@@ -57,7 +57,7 @@ class Event(object):
 
     def __repr__(self):
         return "<{0} {1}>".format(
-            self.headers['eventname'],
+            self.eventname,
             ' '.join([':'.join(item) for item in self.payload.items()]))
 
     ver = HeaderAttribute('ver', int)
@@ -65,6 +65,7 @@ class Event(object):
     serial = HeaderAttribute('serial', int)
     pool = HeaderAttribute('pool')
     poolserial = HeaderAttribute('poolserial')
+    eventname = HeaderAttribute('eventname')
 
 
 class ProcessStateMetaclass(type):

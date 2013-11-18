@@ -6,6 +6,7 @@ import logging
 import socket
 
 import supermann.riemann.riemann_pb2
+import supermann.utils
 
 
 def create_pb_object(cls, data):
@@ -13,7 +14,7 @@ def create_pb_object(cls, data):
     obj = cls()
     for name, value in data.items():
         # Set lists by clearing the field and then extending
-        # Welcome to Python Protocol Buffers! -.-
+        # Welcome to the Protocol Buffers library!
         if isinstance(value, (list, tuple)):
             field = getattr(obj, name)
             del field[:]
@@ -24,15 +25,9 @@ def create_pb_object(cls, data):
 
 
 class Client(object):
-    @staticmethod
-    def event(data):
-        data.setdefault('host', socket.gethostname())
-        data.setdefault('tags', ['supermann'])
-        return create_pb_object(supermann.riemann.riemann_pb2.Event, data)
-
     def __init__(self, host, port):
-        self.log = logging.getLogger(__name__)
-        self.log.info("Sending events to Riemann at %s:%s", host, port)
+        self.log = supermann.utils.getLogger(self)
+        self.log.info("Sending messages to Riemann at %s:%s", host, port)
         self.host = host
         self.port = port
 
@@ -47,11 +42,17 @@ class Client(object):
         return self.send_event(data)
 
     def send_event(self, *events):
-        message = create_pb_object(supermann.riemann.riemann_pb2.Msg, {
-            'events': [self.event(data) for data in events]
+        message = self.create_message({
+            'events': [self.create_event(e) for e in events]
         })
         self.write(message.SerializeToString())
         return message
+
+    def create_event(self, data):
+        return create_pb_object(supermann.riemann.riemann_pb2.Event, data)
+
+    def create_message(self, data):
+        return create_pb_object(supermann.riemann.riemann_pb2.Msg, data)
 
 
 class UDPClient(Client):
