@@ -5,7 +5,7 @@ import logging
 
 from supermann import Supermann
 
-LOG_FORMAT = '%(asctime)s %(levelname)-8s [%(name)s] %(message)s'
+LOG_FORMAT = '%(asctime)s %(levelname)-8s %(message)s (%(name)s)'
 
 LOG_LEVELS = {
     'CRITICAL': logging.CRITICAL,

@@ -6,6 +6,7 @@ import logging
 import sys
 
 import supermann.supervisor.events
+import supermann.utils
 
 
 class EventListener(object):
@@ -13,7 +14,7 @@ class EventListener(object):
 
     def __init__(self, stdin=sys.stdin, stdout=sys.stdout,
                  reserve_stdin=True, reserve_stdout=True):
-        self.log = logging.getLogger(__name__)
+        self.log = supermann.utils.getLogger(self)
 
         # STDIN and STDOUT are referenced by the object, so that they are easy
         # to test, and so the references in sys can be removed (see below)
