@@ -8,7 +8,7 @@ import warnings
 
 import psutil
 
-import supermann.actions
+import supermann.metrics
 import supermann.riemann.client
 import supermann.supervisor.events
 import supermann.supervisor.listener
@@ -18,23 +18,14 @@ class Supermann(object):
     """The main Supermann proccess"""
 
     def __init__(self, reserve_stdin=True, reserve_stdout=True):
-        self.log = logging.getLogger('supermann')
-        self.supervisor = supermann.supervisor.listener.EventListener()
-        self.riemann = supermann.riemann.client.UDPClient('localhost', 5555)
+        self.log = supermann.utils.getLogger(self)
+        self.log.info("This looks like a job for Supermann!")
+
         self.actions = list()
 
-        self.register_action(
-            supermann.supervisor.events.TICK,
-            supermann.actions.SystemMonitorAction)
-        self.register_action(
-            supermann.supervisor.events.TICK,
-            supermann.actions.SupervisorMonitorAction)
-        self.register_action(
-            supermann.supervisor.events.TICK,
-            supermann.actions.ProcessMonitorAction)
-        self.register_action(
-            supermann.supervisor.events.PROCESS_STATE,
-            supermann.actions.ProcessStateAction)
+        self.supervisor = supermann.supervisor.listener.EventListener()
+        self.riemann = supermann.riemann.client.UDPClient(
+            'localhost', 5555, buffer_events=True)
 
     def register_action(self, event_class, action_class):
         self.actions.append((event_class, action_class(self)))
