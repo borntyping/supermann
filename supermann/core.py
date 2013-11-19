@@ -10,6 +10,7 @@ import psutil
 
 import supermann.metrics
 import supermann.riemann.client
+import supermann.supervisor.client
 import supermann.supervisor.events
 import supermann.supervisor.listener
 
@@ -23,7 +24,8 @@ class Supermann(object):
 
         self.actions = list()
 
-        self.supervisor = supermann.supervisor.listener.EventListener()
+        self.listener = supermann.supervisor.listener.EventListener()
+        self.supervisor = supermann.supervisor.client.XMLRPCClient()
         self.riemann = supermann.riemann.client.UDPClient(
             'localhost', 5555, buffer_events=True)
 
@@ -34,15 +36,16 @@ class Supermann(object):
         """Wait for events from Supervisor and pass them to recive()"""
         with self.riemann:
             while True:
-                event = self.supervisor.wait()
+                event = self.listener.wait()
                 self.recive(event)
-                self.supervisor.ok()
+                self.listener.ok()
 
     def recive(self, event):
         """Handle each event from supervisor"""
         for event_class, action in self.actions:
             if isinstance(event, event_class):
                 action(event)
+        self.riemann.flush_events()
 
     @property
     def process(self):

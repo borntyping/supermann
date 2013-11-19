@@ -22,6 +22,7 @@ setuptools.setup(
         'argparse==1.2.1',
         'protobuf==2.5.0',
         'psutil==1.1.3',
+        'supervisor==3.0',
     ],
 
     entry_points = {

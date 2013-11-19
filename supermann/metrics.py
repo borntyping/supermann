@@ -3,9 +3,11 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+
 import socket
 
 import psutil
+
 
 import supermann.supervisor.events
 import supermann.utils
@@ -20,19 +22,27 @@ class Metric(object):
         raise NotImplementedError
 
 
-class ProcessResourceUsage(Metric):
+class ProcessMetric(Metric):
+    def monitor_process(self, name, pid):
+        process = psutil.Process(pid)
+        self.supermann.riemann.send_events({
+            'service': 'process:{name}:cpu'.format(name=name),
+            'metric_f': process.get_cpu_percent(),
+            'tags': ['supermann', 'supervisor', 'process', 'process_cpu']
+        }, {
+            'service': 'process:{name}:mem'.format(name=name),
+            'metric_f': process.get_memory_percent(),
+            'tags': ['supermann', 'supervisor', 'process', 'process_mem']
+        })
+
+
+class ProcessResourceUsage(ProcessMetric):
     def __call__(self, event):
-        for process in self.supermann.parent.get_children():
-            self.log.debug("Monitoring process {0}".format(process.name))
-            self.supermann.riemann.send_events({
-                'service': 'process:{name}:cpu'.format(name=process.name),
-                'metric_f': process.get_cpu_percent(),
-                'tags': ['supermann', 'supervisor', 'process', 'process_cpu']
-            }, {
-                'service': 'process:{name}:mem'.format(name=process.name),
-                'metric_f': process.get_memory_percent(),
-                'tags': ['supermann', 'supervisor', 'process', 'process_mem']
-            })
+        for child in self.supermann.supervisor.processes():
+            self.log.debug("Monitoring process {name}({pid})".format(**child))
+            if child['pid'] == 0:
+                return
+            self.monitor_process(child['name'], child['pid'])
 
 
 class ProcessStateChange(Metric):
@@ -47,8 +57,9 @@ class ProcessStateChange(Metric):
         })
 
 
-class SupervisorMonitor(Metric):
+class SupervisorMonitor(ProcessMetric):
     def __call__(self, event):
+        self.monitor_process('supervisor', self.supermann.supervisor.pid())
         self.supermann.riemann.send_events({
             'service': 'supervisor:tick',
             'state': 'ok',

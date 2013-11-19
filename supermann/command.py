@@ -3,9 +3,9 @@ from __future__ import absolute_import, unicode_literals
 import argparse
 import logging
 
-import supermann
+import supermann.core
+import supermann.metrics
 import supermann.supervisor.events
-import supermann.actions.metrics
 
 LOG_FORMAT = '%(asctime)s %(levelname)-8s [%(name)s] %(message)s'
 
@@ -45,7 +45,7 @@ def main():
 
     configure_logging(args.log_level)
 
-    instance = supermann.Supermann()
+    instance = supermann.core.Supermann()
     instance.check_parent()
 
     instance.register_action(

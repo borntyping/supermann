@@ -28,7 +28,7 @@ class Client(object):
         self.port = port
 
         self.buffer_events = buffer_events
-        self.event_buffer = list()
+        self.clear_events()
 
     def __enter__(self):
         self.connect()
@@ -39,16 +39,21 @@ class Client(object):
 
     def send_events(self, *events):
         events = map(self.create_event, events)
-        if self.buffer_events:
-            self.event_buffer.extend(events)
-        else:
-            self.write_events(*events)
+        self.event_buffer.extend(events)
+        if not self.buffer_events:
+            self.flush_events()
 
     def write_events(self, *events):
-        return self.write(self.create_message({'events': events}))
+        self.log.debug("Sending {n} events to Riemann at {host}:{port}".format(
+            n=len(events), host=self.host, port=self.port))
+        self.write(self.create_message({'events': events}))
 
     def flush_events(self):
-        return self.write_events(*self.event_buffer)
+        self.write_events(*self.event_buffer)
+        self.clear_events()
+
+    def clear_events(self):
+        self.event_buffer = list()
 
     def create_event(self, data):
         data.setdefault('host', socket.gethostname())
