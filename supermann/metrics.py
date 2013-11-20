@@ -3,11 +3,10 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
-
 import socket
 
 import psutil
-
+import supervisor.states
 
 import supermann.supervisor.events
 import supermann.utils
@@ -17,7 +16,7 @@ def metric_name(*components):
     return ':'.join(components)
 
 
-def process_metrics(pid, name=None):
+def process_resource_usage(pid, name=None):
     """Returns CPU and memory metrics for a single process"""
     process = psutil.Process(pid)
     if name is None:
@@ -33,16 +32,17 @@ def process_metrics(pid, name=None):
     })
 
 
-def process_state_change(instance, event):
-    assert isinstance(event, supermann.supervisor.events.PROCESS_STATE)
+def supervisor_child_state(name, state):
+    """Returns metrics for the current state of a Supervisor child"""
     return [{
-        'service': metric_name('process', event.name, 'state'),
-        'state': event.state,
+        'service': metric_name('process', name, 'state'),
+        'state': state,
         'tags': ['supermann', 'supervisor', 'process', 'process_state']
     }]
 
 
 def monitor_system(instance, event):
+    """Returns the systems total CPU and memory usage"""
     return [{
         'service': metric_name('system', 'cpu', 'percent'),
         'metric_f': psutil.cpu_percent(interval=0),
@@ -55,11 +55,22 @@ def monitor_system(instance, event):
 
 
 def monitor_supervisor(instance, event):
-    return process_metrics(instance.supervisor.getPID())
+    """Returns resource usage for the supervisord process"""
+    return process_resource_usage(instance.supervisor.getPID())
 
 
 def monitor_supervisor_children(instance, event):
+    """Returns state and resource usage for each supervisor child"""
     metrics = list()
     for child in instance.supervisor.getAllProcessInfo():
-        metrics.extend(process_metrics(child['pid'], child['name']))
+        state = supervisor.states.getProcessStateDescription(child['state'])
+        if state in ("STARTING", "RUNNING"):
+            metrics.extend(process_resource_usage(child['pid'], child['name']))
+        metrics.extend(supervisor_child_state(child['name'], state))
     return metrics
+
+
+def monitor_process_state_change(instance, event):
+    """Returns a metric with a processes new state"""
+    assert isinstance(event, supermann.supervisor.events.PROCESS_STATE)
+    return supervisor_child_state(event.name, event.state)

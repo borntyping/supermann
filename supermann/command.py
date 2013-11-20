@@ -57,7 +57,7 @@ def main():
     ])
 
     instance.metrics[supermann.supervisor.events.PROCESS_STATE].extend([
-        supermann.metrics.process_state_change
+        supermann.metrics.monitor_process_state_change
     ])
 
     instance.run()
