@@ -13,71 +13,53 @@ import supermann.supervisor.events
 import supermann.utils
 
 
-class Metric(object):
-    def __init__(self, instance):
-        self.log = supermann.utils.getLogger(self)
-        self.supermann = instance
-
-    def __call__(self, event):
-        raise NotImplementedError
+def metric_name(*components):
+    return ':'.join(components)
 
 
-class ProcessMetric(Metric):
-    def monitor_process(self, name, pid):
-        process = psutil.Process(pid)
-        self.supermann.riemann.send_events({
-            'service': 'process:{name}:cpu'.format(name=name),
-            'metric_f': process.get_cpu_percent(),
-            'tags': ['supermann', 'supervisor', 'process', 'process_cpu']
-        }, {
-            'service': 'process:{name}:mem'.format(name=name),
-            'metric_f': process.get_memory_percent(),
-            'tags': ['supermann', 'supervisor', 'process', 'process_mem']
-        })
+def process_metrics(pid, name=None):
+    """Returns CPU and memory metrics for a single process"""
+    process = psutil.Process(pid)
+    if name is None:
+        name = process.name
+    return ({
+        'service': metric_name('process', name, 'cpu'),
+        'metric_f': process.get_cpu_percent(),
+        'tags': ['supermann', 'supervisor', 'process', 'process_cpu']
+    }, {
+        'service': metric_name('process', name, 'mem'),
+        'metric_f': process.get_memory_percent(),
+        'tags': ['supermann', 'supervisor', 'process', 'process_mem']
+    })
 
 
-class ProcessResourceUsage(ProcessMetric):
-    def __call__(self, event):
-        for child in self.supermann.supervisor.processes():
-            self.log.debug("Monitoring process {name}({pid})".format(**child))
-            if child['pid'] == 0:
-                return
-            self.monitor_process(child['name'], child['pid'])
+def process_state_change(instance, event):
+    assert isinstance(event, supermann.supervisor.events.PROCESS_STATE)
+    return [{
+        'service': metric_name('process', event.name, 'state'),
+        'state': event.state,
+        'tags': ['supermann', 'supervisor', 'process', 'process_state']
+    }]
 
 
-class ProcessStateChange(Metric):
-    def __call__(self, event):
-        assert isinstance(event, supermann.supervisor.events.PROCESS_STATE)
-        self.log.debug("Process {0} changed state from {1} to {2}".format(
-            event.name, event.state, event.from_state))
-        self.supermann.riemann.send_events({
-            'service': 'process:{name}:state'.format(name=event.name),
-            'state': event.state,
-            'tags': ['supermann', 'supervisor', 'process', 'process_state']
-        })
+def monitor_system(instance, event):
+    return [{
+        'service': metric_name('system', 'cpu', 'percent'),
+        'metric_f': psutil.cpu_percent(interval=0),
+        'tags': ['supermann', 'system', 'system_cpu']
+    }, {
+        'service': metric_name('system', 'mem', 'percent'),
+        'metric_f': psutil.virtual_memory().percent,
+        'tags': ['supermann', 'system', 'system_mem']
+    }]
 
 
-class SupervisorMonitor(ProcessMetric):
-    def __call__(self, event):
-        self.monitor_process('supervisor', self.supermann.supervisor.pid())
-        self.supermann.riemann.send_events({
-            'service': 'supervisor:tick',
-            'state': 'ok',
-            'time': event.when,
-            'metric_f': event.serial,
-            'tags': ['supermann', 'supervisor', 'supervisor_tick']
-        })
+def monitor_supervisor(instance, event):
+    return process_metrics(instance.supervisor.getPID())
 
 
-class SystemResourceUsage(Metric):
-    def __call__(self, event):
-        """Monitors the system's CPU and memory percentages"""
-        self.supermann.riemann.send_events({
-            'service': 'system:cpu:percent',
-            'metric_f': psutil.cpu_percent(interval=0),
-            'tags': ['supermann', 'system', 'system_cpu']
-        }, {
-            'service': 'system:mem:percent',
-            'metric_f': psutil.virtual_memory().percent,
-            'tags': ['supermann', 'system', 'system_mem']
-        })
+def monitor_supervisor_children(instance, event):
+    metrics = list()
+    for child in instance.supervisor.getAllProcessInfo():
+        metrics.extend(process_metrics(child['pid'], child['name']))
+    return metrics

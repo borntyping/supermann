@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import abc
 import logging
 import socket
 
@@ -21,14 +22,13 @@ def create_pb_object(cls, data):
 
 
 class Client(object):
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, host, port, buffer_events=False):
         self.log = supermann.utils.getLogger(self)
         self.log.info("Sending messages to Riemann at %s:%s", host, port)
         self.host = host
         self.port = port
-
-        self.buffer_events = buffer_events
-        self.clear_events()
 
     def __enter__(self):
         self.connect()
@@ -37,23 +37,24 @@ class Client(object):
     def __exit__(self, exc_type, exc_value, traceback):
         self.disconnect()
 
-    def send_events(self, *events):
-        events = map(self.create_event, events)
-        self.event_buffer.extend(events)
-        if not self.buffer_events:
-            self.flush_events()
+    @abc.abstractmethod
+    def connect(self):
+        pass
 
-    def write_events(self, *events):
+    @abc.abstractmethod
+    def disconnect(self):
+        pass
+
+    @abc.abstractmethod
+    def write(self):
+        pass
+
+    def send_events(self, *events):
         self.log.debug("Sending {n} events to Riemann at {host}:{port}".format(
             n=len(events), host=self.host, port=self.port))
-        self.write(self.create_message({'events': events}))
-
-    def flush_events(self):
-        self.write_events(*self.event_buffer)
-        self.clear_events()
-
-    def clear_events(self):
-        self.event_buffer = list()
+        self.write(self.create_message({
+            'events': map(self.create_event, events)
+        }))
 
     def create_event(self, data):
         data.setdefault('host', socket.gethostname())

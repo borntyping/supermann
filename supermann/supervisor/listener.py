@@ -25,10 +25,10 @@ class EventListener(object):
         # reserve them by replacing the sys attributes with None
         if reserve_stdin:
             sys.stdin = None
-            self.log.warn("Supervisor listener has reserved STDIN")
+            self.log.debug("Supervisor listener has reserved STDIN")
         if reserve_stdout:
             sys.stdout = None
-            self.log.warn("Supervisor listener has reserved STDOUT")
+            self.log.debug("Supervisor listener has reserved STDOUT")
 
     def parse(self, line):
         """Parses a Supervisor header or payload"""

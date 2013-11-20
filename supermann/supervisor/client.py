@@ -7,12 +7,6 @@ import os
 import supervisor.childutils
 
 
-class XMLRPCClient(object):
-    def __init__(self):
-        self.server = supervisor.childutils.getRPCInterface(os.environ)
-
-    def processes(self):
-        return self.server.supervisor.getAllProcessInfo()
-
-    def pid(self):
-        return self.server.supervisor.getPID()
+def XMLRPCClient():
+    """Returns an XML-RPC client built from Supervisor's environment"""
+    return supervisor.childutils.getRPCInterface(os.environ)

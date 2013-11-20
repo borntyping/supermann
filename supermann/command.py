@@ -19,6 +19,7 @@ LOG_LEVELS = {
 
 
 def configure_logging(level=logging.INFO):
+    """This configures the supermann log to output to the console"""
     if isinstance(level, basestring):
         level = LOG_LEVELS.get(level)
     handler = logging.StreamHandler()
@@ -29,6 +30,7 @@ def configure_logging(level=logging.INFO):
 
 
 def formatter_class(*args, **kwargs):
+    """Builds a modified argparse formatter"""
     kwargs.setdefault('max_help_position', 32)
     return argparse.ArgumentDefaultsHelpFormatter(*args, **kwargs)
 
@@ -48,17 +50,14 @@ def main():
     instance = supermann.core.Supermann()
     instance.check_parent()
 
-    instance.register_action(
-        supermann.supervisor.events.TICK,
-        supermann.metrics.SupervisorMonitor)
-    instance.register_action(
-        supermann.supervisor.events.TICK,
-        supermann.metrics.SystemResourceUsage)
-    instance.register_action(
-        supermann.supervisor.events.TICK,
-        supermann.metrics.ProcessResourceUsage)
-    instance.register_action(
-        supermann.supervisor.events.PROCESS_STATE,
-        supermann.metrics.ProcessStateChange)
+    instance.metrics[supermann.supervisor.events.TICK].extend([
+        supermann.metrics.monitor_system,
+        supermann.metrics.monitor_supervisor,
+        supermann.metrics.monitor_supervisor_children
+    ])
+
+    instance.metrics[supermann.supervisor.events.PROCESS_STATE].extend([
+        supermann.metrics.process_state_change
+    ])
 
     instance.run()
