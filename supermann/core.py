@@ -19,20 +19,16 @@ import supermann.supervisor.listener
 class Supermann(object):
     """The main Supermann process"""
 
-    def __init__(self, riemann=None):
+    def __init__(self, host='localhost', port=5555):
         self.log = supermann.utils.getLogger(self)
         self.log.info("This looks like a job for Supermann!")
 
         self.metrics = collections.defaultdict(list)
         self.queue = list()
 
-        # Create a default Riemann client if we aren't given one
-        if riemann is None:
-            riemann = supermann.riemann.client.UDPClient('localhost', 5555)
-
         self.event_listener = supermann.supervisor.listener.EventListener()
         self.supervisor_client = supermann.supervisor.client.XMLRPCClient()
-        self.riemann = riemann
+        self.riemann = supermann.riemann.client.UDPClient(host, port)
 
     @property
     def supervisor(self):

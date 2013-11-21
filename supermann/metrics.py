@@ -6,7 +6,6 @@ import logging
 import socket
 
 import psutil
-import supervisor.states
 
 import supermann.supervisor.events
 import supermann.utils
@@ -63,10 +62,9 @@ def monitor_supervisor_children(instance, event):
     """Returns state and resource usage for each supervisor child"""
     metrics = list()
     for child in instance.supervisor.getAllProcessInfo():
-        state = supervisor.states.getProcessStateDescription(child['state'])
-        if state in ("STARTING", "RUNNING"):
+        if child['statename'] in ("STARTING", "RUNNING"):
             metrics.extend(process_resource_usage(child['pid'], child['name']))
-        metrics.extend(supervisor_child_state(child['name'], state))
+        metrics.extend(supervisor_child_state(child['name'], child['statename']))
     return metrics
 
 
