@@ -11,9 +11,7 @@ import psutil
 
 import supermann.metrics
 import supermann.riemann.client
-import supermann.supervisor.client
-import supermann.supervisor.events
-import supermann.supervisor.listener
+import supermann.supervisor
 
 
 class Supermann(object):
@@ -23,32 +21,30 @@ class Supermann(object):
         self.log = supermann.utils.getLogger(self)
         self.log.info("This looks like a job for Supermann!")
 
-        self.metrics = collections.defaultdict(list)
+        self.actions = collections.defaultdict(list)
 
-        self.supervisor_listener = supermann.supervisor.listener.EventListener()
-        self.supervisor_client = supermann.supervisor.client.XMLRPCClient()
+        self.supervisor = supermann.supervisor.Supervisor()
         self.riemann = supermann.riemann.Riemann(host, port)
 
     @property
-    def supervisor(self):
-        """Returns the supervisor namespace of the XML-RPC client"""
-        return self.supervisor_client.supervisor
+    def supervisor_interface(self):
+        """Returns the supervisor namespace of the XML-RPC interface"""
+        return self.supervisor.interface.supervisor
 
     # Event handling
 
     def run(self):
         """Wait for events from Supervisor and pass them to recive()"""
         with self.riemann.client:
-            while True:
-                event = self.supervisor_listener.wait()
+            for headers, payload in self.supervisor.run_forever():
+                event = supermann.supervisor.events.Event(headers, payload)
                 self.recive(event)
-                self.supervisor_listener.ok()
 
     def recive(self, supervisor_event):
         """Handle each event from supervisor"""
-        for event_class in self.metrics:
+        for event_class in self.actions:
             if isinstance(supervisor_event, event_class):
-                for action in self.metrics[event_class]:
+                for action in self.actions[event_class]:
                     self.log.debug("Collecting metric {0}.{1}".format(
                         action.__module__, action.__name__))
                     action(self, supervisor_event)
@@ -83,6 +79,6 @@ class Supermann(object):
             self.log.warn("Supermann has no parent process!")
         self.log.info("Supermann process PID is: {0}".format(self.process.pid))
         self.log.info("Parent process PID is: {0}".format(self.parent.pid))
-        if self.process.parent.pid != self.supervisor.getPID():
+        if self.process.parent.pid != self.supervisor_interface.getPID():
             self.log.warn("Supermann is not running under supervisord")
 

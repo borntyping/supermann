@@ -12,7 +12,7 @@ import supermann.utils
 
 
 def emit_supervisor_children(self, event):
-    for child in instance.supervisor.getAllProcessInfo():
+    for child in instance.supervisor_interface.getAllProcessInfo():
         self.recive(Process(child))
 
 
@@ -48,12 +48,12 @@ def state(name, state):
 
 def monitor_supervisor(instance, event):
     """Returns resource usage for the supervisord process"""
-    instance.queue_events(*usage(instance.supervisor.getPID()))
+    instance.queue_events(*usage(instance.supervisor_interface.getPID()))
 
 
 def monitor_supervisor_children(instance, event):
     """Returns state and resource usage for each supervisor child"""
-    for child in instance.supervisor.getAllProcessInfo():
+    for child in instance.supervisor_interface.getAllProcessInfo():
         instance.queue_events(*state(child['name'], child['statename']))
         if child['statename'] in ("STARTING", "RUNNING"):
             instance.queue_events(*usage(child['pid'], child['name']))
