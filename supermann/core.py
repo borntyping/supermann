@@ -5,12 +5,14 @@ from __future__ import absolute_import, unicode_literals
 import collections
 import logging
 import os
+import traceback
 import warnings
 
 import psutil
 
 import supermann.metrics
-import supermann.riemann.client
+import supermann.riemann
+import supermann.signals
 import supermann.supervisor
 
 
@@ -23,62 +25,48 @@ class Supermann(object):
 
         self.actions = collections.defaultdict(list)
 
+        # The Supervisor interface reads configuration from the environment
         self.supervisor = supermann.supervisor.Supervisor()
+
+        # But Riemann does need configuring
         self.riemann = supermann.riemann.Riemann(host, port)
 
-    @property
-    def supervisor_interface(self):
-        """Returns the supervisor namespace of the XML-RPC interface"""
-        return self.supervisor.interface.supervisor
-
-    # Event handling
+    def connect(self, signal, reciver):
+        """Connects a signal that will recive messages from this instance"""
+        return signal.connect(reciver, sender=self)
 
     def run(self):
-        """Wait for events from Supervisor and pass them to recive()"""
-        with self.riemann.client:
-            for headers, payload in self.supervisor.run_forever():
-                event = supermann.supervisor.events.Event(headers, payload)
-                self.recive(event)
+        try:
+            self.riemann.client.connect()
+            for event in self.supervisor.run_forever():
+                # Emit a signal for each event
+                supermann.signals.event.send(self, event=event)
+                # Emit a signal for each Supervisor subprocess
+                self.emit_processes(event=event)
+                # Send the queued events at the end of the cycle
+                self.riemann.send_queue()
+        except Exception as exception:
+            self.log.exception("A fatal exception has occurred:")
+            traceback.print_exc()
+        finally:
+            # Ensure the Riemann client is closed if we crash
+            self.riemann.client.disconnect()
 
-    def recive(self, supervisor_event):
-        """Handle each event from supervisor"""
-        for event_class in self.actions:
-            if isinstance(supervisor_event, event_class):
-                for action in self.actions[event_class]:
-                    self.log.debug("Collecting metric {0}.{1}".format(
-                        action.__module__, action.__name__))
-                    action(self, supervisor_event)
-        self.riemann.send_queue()
-
-    # Event queue
-
-    def metric(self, service, metric_f):
-        self.riemann.queue_events({
-            'service': service,
-            'metric_f': metric_f,
-            'tags': ['supermann'] + service.split(':')
-        })
-
-    def queue_events(self, *events):
-        # TODO: Remove this wrapper
-        self.riemann.queue_events(*events)
-
-    # Process management
-
-    @property
-    def process(self):
-        return psutil.Process(os.getpid())
-
-    @property
-    def parent(self):
-        return self.process.parent
+    def emit_processes(self, event):
+        """Emit a signal for each Supervisor child process"""
+        for data in self.supervisor.rpc.getAllProcessInfo():
+            process = psutil.Process(data['pid'])
+            data.setdefault('name', process.name)
+            supermann.signals.process.send(self, process=process, **data)
 
     def check_parent(self):
         """Checks that Supermann is running under Supervisor"""
-        if self.parent is None:
+        process = psutil.Process()
+
+        if process.parent is None:
             self.log.warn("Supermann has no parent process!")
         self.log.info("Supermann process PID is: {0}".format(self.process.pid))
         self.log.info("Parent process PID is: {0}".format(self.parent.pid))
-        if self.process.parent.pid != self.supervisor_interface.getPID():
+        if process.parent.pid != self.supervisor.rpc.getPID():
             self.log.warn("Supermann is not running under supervisord")
 

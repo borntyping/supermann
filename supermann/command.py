@@ -6,7 +6,9 @@ import logging
 import supermann.core
 import supermann.metrics
 import supermann.metrics.system
-import supermann.supervisor.events
+import supermann.metrics.process
+import supermann.signals
+
 
 LOG_FORMAT = '%(asctime)s %(levelname)-8s [%(name)s] %(message)s'
 
@@ -49,31 +51,19 @@ def main():
     # Log messages are sent to stderr, and Supervisor takes care of the rest
     configure_logging(args.log_level)
 
-    instance = supermann.core.Supermann()
+    # Create a Supermann instance, and check it is running under Supervisord
+    self = supermann.core.Supermann()
+    self.check_parent()
 
-    # This checks that Supermann is running under Supervisord
-    instance.check_parent()
+    # A tick signal should be emitted when Supervisord ticks
+    self.connect(supermann.signals.event, supermann.metrics.system.cpu)
+    self.connect(supermann.signals.event, supermann.metrics.system.mem)
+    self.connect(supermann.signals.event, supermann.metrics.system.swap)
 
-    instance.actions[supermann.supervisor.events.TICK].extend([
-        supermann.metrics.system.cpu,
-        supermann.metrics.system.mem,
-        supermann.metrics.system.swap,
+    # Supermann should emit a signal for each process being monitored
+    self.connect(supermann.signals.process, supermann.metrics.process.cpu)
+    self.connect(supermann.signals.process, supermann.metrics.process.mem)
+    self.connect(supermann.signals.process, supermann.metrics.process.state)
 
-        supermann.metrics.monitor_supervisor,
-        supermann.metrics.monitor_supervisor_children
-    ])
-
-    instance.actions[supermann.supervisor.events.PROCESS_STATE].extend([
-        supermann.metrics.monitor_process_state_change
-    ])
-
-    # # A tick signal should be emitted when Supervisord ticks
-    # instance.connect(supermann.signals.tick, supermann.metrics.system.cpu)
-    # instance.connect(supermann.signals.tick, supermann.metrics.system.mem)
-    # instance.connect(supermann.signals.tick, supermann.metrics.system.swap)
-
-    # # Supermann should emit a signal for each process being monitored
-    # instance.connect(supermann.signals.process, supermann.metrics.process.cpu)
-    # instance.connect(supermann.signals.process, supermann.metrics.process.mem)
-
-    instance.run()
+    # Supermann will then attempt to run forever
+    self.run()

@@ -7,7 +7,7 @@ import sys
 
 setuptools.setup(
     name = "supermann",
-    version = '0.4.0',
+    version = '0.5.0',
 
     author = "Sam Clements",
     author_email = "sam.clements@datasift.com",
@@ -20,8 +20,9 @@ setuptools.setup(
 
     install_requires = [
         'argparse==1.2.1',
+        'blinker==1.3',
         'protobuf==2.5.0',
-        'psutil==1.1.3',
+        'psutil==1.2.0',
         'supervisor==3.0',
     ],
 

@@ -5,9 +5,20 @@ from __future__ import absolute_import, unicode_literals, print_function
 import os
 import sys
 
+import blinker
 import supervisor.childutils
 
 import supermann.utils
+import supermann.signals
+
+
+class Event(object):
+    __slots__ = ['headers', 'payload']
+
+    def __init__(self, headers, payload):
+        self.headers = headers
+        self.payload = payload
+
 
 class EventListener(object):
     """A simple Supervisor event listener"""
@@ -55,15 +66,24 @@ class EventListener(object):
         headers = self.parse(self.stdin.readline())
         payload = self.parse(self.stdin.read(int(headers.pop('len'))))
         self.log.debug("Received %s from supervisor", headers['eventname'])
-        return headers, payload
+        return Event(headers, payload)
 
 class Supervisor(object):
     def __init__(self):
         self.listener = EventListener()
         self.interface = supervisor.childutils.getRPCInterface(os.environ)
 
+    @property
+    def rpc(self):
+        """Returns the 'supervisor' namespace of the XML-RPC interface"""
+        return self.interface.supervisor
+
     def run_forever(self):
         while True:
             self.listener.ready()
             yield self.listener.wait()
             self.listener.ok()
+
+    def emit_supervisor_children(self, sender=None):
+        for child in self.interface.getAllProcessInfo():
+            supermann.signals.child.send(sender, **child)
