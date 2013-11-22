@@ -23,7 +23,7 @@ class Supermann(object):
         self.log = supermann.utils.getLogger(self)
         self.log.info("This looks like a job for Supermann!")
 
-        self.metrics = collections.defaultdict(list)
+        self.actions = collections.defaultdict(list)
         self.queue = list()
 
         self.event_listener = supermann.supervisor.listener.EventListener()
@@ -37,7 +37,7 @@ class Supermann(object):
 
     # Event handling
 
-    def register_metric_function(self, event_class, *functions):
+    def connect(self, event_class, *functions):
         self.metric_functions[event_class].extend(functions)
 
     def run(self):
@@ -50,15 +50,22 @@ class Supermann(object):
 
     def recive(self, supervisor_event):
         """Handle each event from supervisor"""
-        for event_class in self.metrics:
+        for event_class in self.actions:
             if isinstance(supervisor_event, event_class):
-                for metric in self.metrics[event_class]:
+                for action in self.actions[event_class]:
                     self.log.debug("Collecting metric {0}.{1}".format(
-                        metric.__module__, metric.__name__))
-                    self.queue_events(*metric(self, supervisor_event))
+                        action.__module__, action.__name__))
+                    action(self, supervisor_event)
         self.flush_queue()
 
     # Event queue
+
+    def metric(self, service, metric_f):
+        self.queue_events({
+            'service': service,
+            'metric_f': metric_f,
+            'tags': ['supermann'] + service.split(':')
+        })
 
     def queue_events(self, *events):
         self.queue.extend(events)

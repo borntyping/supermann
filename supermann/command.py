@@ -50,13 +50,13 @@ def main():
     instance = supermann.core.Supermann()
     instance.check_parent()
 
-    instance.metrics[supermann.supervisor.events.TICK].extend([
+    instance.actions[supermann.supervisor.events.TICK].extend([
         supermann.metrics.monitor_system,
         supermann.metrics.monitor_supervisor,
         supermann.metrics.monitor_supervisor_children
     ])
 
-    instance.metrics[supermann.supervisor.events.PROCESS_STATE].extend([
+    instance.actions[supermann.supervisor.events.PROCESS_STATE].extend([
         supermann.metrics.monitor_process_state_change
     ])
 
