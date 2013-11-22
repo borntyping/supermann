@@ -46,13 +46,13 @@ class Client(object):
         pass
 
     @abc.abstractmethod
-    def write(self):
+    def send(self):
         pass
 
     def send_events(self, *events):
         self.log.debug("Sending {n} events to Riemann at {host}:{port}".format(
             n=len(events), host=self.host, port=self.port))
-        self.write(self.create_message({
+        self.send(self.create_message({
             'events': map(self.create_event, events)
         }))
 
@@ -71,6 +71,6 @@ class UDPClient(Client):
     def disconnect(self):
         self.socket.close()
 
-    def write(self, message):
+    def send(self, message):
         self.socket.sendto(message.SerializeToString(), (self.host, self.port))
         return message

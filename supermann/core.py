@@ -23,12 +23,11 @@ class Supermann(object):
         self.log = supermann.utils.getLogger(self)
         self.log.info("This looks like a job for Supermann!")
 
-        self.actions = collections.defaultdict(list)
-        self.queue = list()
+        self.metrics = collections.defaultdict(list)
 
-        self.event_listener = supermann.supervisor.listener.EventListener()
+        self.supervisor_listener = supermann.supervisor.listener.EventListener()
         self.supervisor_client = supermann.supervisor.client.XMLRPCClient()
-        self.riemann = supermann.riemann.client.UDPClient(host, port)
+        self.riemann = supermann.riemann.Riemann(host, port)
 
     @property
     def supervisor(self):
@@ -37,43 +36,36 @@ class Supermann(object):
 
     # Event handling
 
-    def connect(self, event_class, *functions):
-        self.metric_functions[event_class].extend(functions)
-
     def run(self):
         """Wait for events from Supervisor and pass them to recive()"""
-        with self.riemann:
+        with self.riemann.client:
             while True:
-                event = self.event_listener.wait()
+                event = self.supervisor_listener.wait()
                 self.recive(event)
-                self.event_listener.ok()
+                self.supervisor_listener.ok()
 
     def recive(self, supervisor_event):
         """Handle each event from supervisor"""
-        for event_class in self.actions:
+        for event_class in self.metrics:
             if isinstance(supervisor_event, event_class):
-                for action in self.actions[event_class]:
+                for action in self.metrics[event_class]:
                     self.log.debug("Collecting metric {0}.{1}".format(
                         action.__module__, action.__name__))
                     action(self, supervisor_event)
-        self.flush_queue()
+        self.riemann.send_queue()
 
     # Event queue
 
     def metric(self, service, metric_f):
-        self.queue_events({
+        self.riemann.queue_events({
             'service': service,
             'metric_f': metric_f,
             'tags': ['supermann'] + service.split(':')
         })
 
     def queue_events(self, *events):
-        self.queue.extend(events)
-
-    def flush_queue(self):
-        """Sends all events in the queue to Riemann and resets the queue"""
-        self.riemann.send_events(*self.queue)
-        self.queue = list()
+        # TODO: Remove this wrapper
+        self.riemann.queue_events(*events)
 
     # Process management
 

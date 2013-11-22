@@ -11,6 +11,12 @@ import supermann.supervisor.events
 import supermann.utils
 
 
+def emit_supervisor_children(self, event):
+    for child in instance.supervisor.getAllProcessInfo():
+        self.recive(Process(child))
+
+
+
 def metric_name(*components):
     return ':'.join(components)
 
@@ -38,13 +44,6 @@ def state(name, state):
         'state': state,
         'tags': ['supermann', 'supervisor', 'process', 'process_state']
     }]
-
-
-def monitor_system(instance, event):
-    """Returns the systems total CPU and memory usage"""
-    instance.metric('system:cpu:percent', psutil.cpu_percent(interval=0))
-    instance.metric('system:mem:percent', psutil.virtual_memory().percent)
-    instance.metric('system:mem:absolute', psutil.virtual_memory().used)
 
 
 def monitor_supervisor(instance, event):
