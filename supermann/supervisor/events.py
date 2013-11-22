@@ -135,6 +135,8 @@ class TickMetaclass(type):
 
 
 class TICK(Event):
+    __metaclass__ = TickMetaclass
+
     when = PayloadAttribute('when', int)
 
 
