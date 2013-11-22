@@ -11,7 +11,7 @@ import warnings
 import psutil
 
 import supermann.metrics
-import supermann.riemann
+import supermann.riemann.client
 import supermann.signals
 import supermann.supervisor
 
@@ -29,7 +29,7 @@ class Supermann(object):
         self.supervisor = supermann.supervisor.Supervisor()
 
         # But Riemann does need configuring
-        self.riemann = supermann.riemann.Riemann(host, port)
+        self.riemann = supermann.riemann.client.UDPClient(host, port)
 
     def connect(self, signal, reciver):
         """Connects a signal that will recive messages from this instance"""
@@ -37,20 +37,20 @@ class Supermann(object):
 
     def run(self):
         try:
-            self.riemann.client.connect()
+            self.riemann.connect()
             for event in self.supervisor.run_forever():
                 # Emit a signal for each event
                 supermann.signals.event.send(self, event=event)
                 # Emit a signal for each Supervisor subprocess
                 self.emit_processes(event=event)
                 # Send the queued events at the end of the cycle
-                self.riemann.send_queue()
+                self.riemann.send_next_message()
         except Exception as exception:
             self.log.exception("A fatal exception has occurred:")
             traceback.print_exc()
         finally:
             # Ensure the Riemann client is closed if we crash
-            self.riemann.client.disconnect()
+            self.riemann.disconnect()
 
     def emit_processes(self, event):
         """Emit a signal for each Supervisor child process"""
