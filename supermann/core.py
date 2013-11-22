@@ -55,8 +55,10 @@ class Supermann(object):
     def emit_processes(self, event):
         """Emit a signal for each Supervisor child process"""
         for data in self.supervisor.rpc.getAllProcessInfo():
-            process = psutil.Process(data['pid'])
-            data.setdefault('name', process.name)
+            try:
+                process = psutil.Process(data['pid'])
+            except psutil.NoSuchProcess:
+                process = None
             supermann.signals.process.send(self, process=process, **data)
 
     def check_parent(self):
@@ -65,8 +67,8 @@ class Supermann(object):
 
         if process.parent is None:
             self.log.warn("Supermann has no parent process!")
-        self.log.info("Supermann process PID is: {0}".format(self.process.pid))
-        self.log.info("Parent process PID is: {0}".format(self.parent.pid))
+        self.log.info("Supermann process PID is: {0}".format(process.pid))
+        self.log.info("Parent process PID is: {0}".format(process.parent.pid))
         if process.parent.pid != self.supervisor.rpc.getPID():
             self.log.warn("Supermann is not running under supervisord")
 

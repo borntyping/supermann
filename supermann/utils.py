@@ -14,7 +14,8 @@ logging.getLogger('supermann').addHandler(NullHandler())
 
 def fullname(obj):
     """Returns the qualified name of an object's class"""
-    return '.'.join([obj.__module__, obj.__class__.__name__])
+    name = obj.__name__ if hasattr(obj, '__name__') else obj.__class__.__name__
+    return '.'.join([obj.__module__, name])
 
 
 def getLogger(obj):
