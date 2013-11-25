@@ -5,7 +5,6 @@ from __future__ import absolute_import, unicode_literals, print_function
 import os
 import sys
 
-import blinker
 import supervisor.childutils
 
 import supermann.utils
@@ -68,13 +67,14 @@ class EventListener(object):
         self.log.debug("Received %s from supervisor", headers['eventname'])
         return Event(headers, payload)
 
+
 class Supervisor(object):
     """Contains the Supervisor event listener and XML-RPC interface"""
 
     def __init__(self):
         self.log = supermann.utils.getLogger(self)
         self.log.info("Using Supervisor XML-RPC interface at {0}".format(
-            os.environ['SUPERVISOR_SERVER_URL'])))
+            os.environ['SUPERVISOR_SERVER_URL']))
         self.listener = EventListener()
         self.interface = supervisor.childutils.getRPCInterface(os.environ)
 

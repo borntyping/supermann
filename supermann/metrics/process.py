@@ -4,8 +4,6 @@ from __future__ import absolute_import, unicode_literals
 
 import functools
 
-import psutil
-
 import supermann.utils
 
 
@@ -16,7 +14,7 @@ def running_process(function):
         if process:
             return function(sender, process, **data)
         log = supermann.utils.getLogger(function)
-        log.warn("Process '{name}' does not exist ({statename})".format(**data))
+        log.warn("Process {name} does not exist ({statename})".format(**data))
     return wrapper
 
 

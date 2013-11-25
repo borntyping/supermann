@@ -3,9 +3,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import collections
-import logging
+import os
 import traceback
-import warnings
 
 import psutil
 
@@ -45,7 +44,7 @@ class Supermann(object):
                 self.emit_processes(event=event)
                 # Send the queued events at the end of the cycle
                 self.riemann.send_next_message()
-        except Exception as exception:
+        except Exception:
             self.log.exception("A fatal exception has occurred:")
             traceback.print_exc()
         finally:
