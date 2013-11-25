@@ -1,0 +1,2 @@
+ver:3.0 server:supervisor serial:21 pool:listener poolserial:10 eventname:PROCESS_STATE_STARTING len:58
+processname:cat groupname:cat from_state:STARTING pid:2766

@@ -1,6 +1,6 @@
 """Supervisor interface for Supermann"""
 
-from __future__ import absolute_import, unicode_literals, print_function
+from __future__ import absolute_import, unicode_literals
 
 import os
 import sys
@@ -40,7 +40,8 @@ class EventListener(object):
             sys.stdout = None
             self.log.debug("Supervisor listener has reserved STDOUT")
 
-    def parse(self, line):
+    @staticmethod
+    def parse(line):
         """Parses a Supervisor header or payload"""
         return dict([pair.split(':') for pair in line.split()])
 
