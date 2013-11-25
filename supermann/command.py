@@ -43,6 +43,12 @@ parser.add_argument(
     '-l', '--log-level', metavar='LEVEL',
     default='INFO', choices=LOG_LEVELS.keys(),
     help="One of CRITICAL, ERROR, WARNING, INFO, DEBUG")
+parser.add_argument(
+    'host', type=str, nargs='?', default='localhost',
+    help="The Riemann server to connect to")
+parser.add_argument(
+    'port', type=int, nargs='?', default=5555,
+    help="The Riemann server to connect to")
 
 
 def main():
@@ -52,8 +58,8 @@ def main():
     configure_logging(args.log_level)
 
     # Create a Supermann instance, and check it is running under Supervisord
-    self = supermann.core.Supermann()
-    self.check_parent()
+    self = supermann.core.Supermann(host=args.host, port=args.port)
+    self.check_supervisor()
 
     # A tick signal should be emitted when Supervisord ticks
     self.connect(supermann.signals.event, supermann.metrics.system.cpu)

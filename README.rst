@@ -26,9 +26,11 @@ Configuration
 Supermann runs as a Supervisor event listener::
 
     [eventlistener:supermann]
-    command=supermann
+    command=supermann localhost 5555
     events=PROCESS_STATE,TICK_5
     autorestart=true
+
+Run `supermann --help` for usage information.
 
 Notes
 -----

@@ -72,6 +72,9 @@ class Supervisor(object):
     """Contains the Supervisor event listener and XML-RPC interface"""
 
     def __init__(self):
+        self.log = supermann.utils.getLogger(self)
+        self.log.info("Using Supervisor XML-RPC interface at {0}".format(
+            os.environ['SUPERVISOR_SERVER_URL'])))
         self.listener = EventListener()
         self.interface = supervisor.childutils.getRPCInterface(os.environ)
 

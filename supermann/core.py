@@ -4,7 +4,6 @@ from __future__ import absolute_import, unicode_literals
 
 import collections
 import logging
-import os
 import traceback
 import warnings
 
@@ -62,14 +61,27 @@ class Supermann(object):
                 process = None
             supermann.signals.process.send(self, process=process, **data)
 
-    def check_parent(self):
-        """Checks that Supermann is running under Supervisor"""
+    def check_supervisor(self):
+        """Checks that Supermann is correctly running under Supervisor"""
         process = psutil.Process()
 
-        if process.parent is None:
-            self.log.warn("Supermann has no parent process!")
         self.log.info("Supermann process PID is: {0}".format(process.pid))
-        self.log.info("Parent process PID is: {0}".format(process.parent.pid))
-        if process.parent.pid != self.supervisor.rpc.getPID():
-            self.log.warn("Supermann is not running under supervisord")
 
+        # Check that Supermann has a parent process
+        if process.parent is None:
+            self.log.critical("Supermann has no parent process!")
+            return False
+
+        self.log.info("Parent process PID is: {0}".format(process.parent.pid))
+
+        # Check that the SUPERVISOR_SERVER_URL environment variable is set
+        if 'SUPERVISOR_SERVER_URL' not in os.environ:
+            self.log.critical("SUPERVISOR_SERVER_URL is not set!")
+            return False
+
+        # Check that the parent PID and the Supervisor PID match up
+        if process.parent.pid != self.supervisor.rpc.getPID():
+            self.log.critical("Supermann's parent process is not Supervisord!")
+            return False
+
+        return True
