@@ -36,6 +36,7 @@ class Supermann(object):
         return signal.connect(reciver, sender=self)
 
     def run(self):
+        """Runs forever, ensuring Riemann is disconnected properly"""
         try:
             self.riemann.connect()
             for event in self.supervisor.run_forever():

@@ -51,6 +51,8 @@ null handler::
 
     logging.getLogger('supermann').addHandler(NullHandler())
 
+Supermann should never send events with a nil host, and will always use the current hostname as the default host for events.
+
 Licence
 -------
 

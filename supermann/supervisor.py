@@ -69,6 +69,8 @@ class EventListener(object):
         return Event(headers, payload)
 
 class Supervisor(object):
+    """Contains the Supervisor event listener and XML-RPC interface"""
+
     def __init__(self):
         self.listener = EventListener()
         self.interface = supervisor.childutils.getRPCInterface(os.environ)
@@ -79,11 +81,8 @@ class Supervisor(object):
         return self.interface.supervisor
 
     def run_forever(self):
+        """Yields events from Supervisor, managing the OK and READY signals"""
         while True:
             self.listener.ready()
             yield self.listener.wait()
             self.listener.ok()
-
-    def emit_supervisor_children(self, sender=None):
-        for child in self.interface.getAllProcessInfo():
-            supermann.signals.child.send(sender, **child)
