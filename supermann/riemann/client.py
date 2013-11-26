@@ -14,12 +14,19 @@ class Client(object):
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, host, port, buffer_events=False):
+    def __init__(self, host, port=5555):
         self.log = supermann.utils.getLogger(self)
         self.log.info("Sending messages to Riemann at %s:%s", host, port)
         self.host = host
         self.port = port
         self.create_next_message()
+
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.disconnect()
 
     @abc.abstractmethod
     def connect(self):

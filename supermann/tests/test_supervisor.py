@@ -53,7 +53,9 @@ class TestEventListener(object):
 
 class TestSupervisor(object):
     def __init__(self):
-        os.environ['SUPERVISOR_SERVER_URL'] = 'unix:///dev/null'
+        py.test.monkeypatch.setattr(os, 'environ', {
+            'SUPERVISOR_SERVER_URL': 'unix:///dev/null'
+        })
 
     def test_rpc_property(self):
         assert supermann.supervisor.Supervisor().rpc
