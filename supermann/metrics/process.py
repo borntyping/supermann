@@ -30,6 +30,16 @@ def mem(sender, process, name, **data):
     sender.riemann.event(
         service='process:{name}:mem:percent'.format(name=name),
         metric_f=process.get_memory_percent())
+    sender.riemann.event(
+        service='process:{name}:mem:absolute'.format(name=name),
+        metric_f=process.get_memory_info()[0])
+
+
+@running_process
+def fds(sender, process, name, **data):
+    sender.riemann.event(
+        service='process:{name}:fds'.format(name=name),
+        metric_f=process.get_num_fds())
 
 
 def state(sender, process, name, **data):

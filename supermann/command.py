@@ -69,6 +69,7 @@ def main():
     # Supermann should emit a signal for each process being monitored
     self.connect(supermann.signals.process, supermann.metrics.process.cpu)
     self.connect(supermann.signals.process, supermann.metrics.process.mem)
+    self.connect(supermann.signals.process, supermann.metrics.process.fds)
     self.connect(supermann.signals.process, supermann.metrics.process.state)
 
     # Supermann will then attempt to run forever
