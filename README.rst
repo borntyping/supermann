@@ -2,7 +2,7 @@
 Supermann
 =========
 
-A `Supervisor`_ event listener for `Riemann`_.
+Supermann monitors processes running under `Supervisor <http://supervisord.org/>`_ and sends metrics to `Riemann <http://riemann.io/>`_.
 
 Requirements
 ------------
@@ -10,6 +10,7 @@ Requirements
 * `argparse <https://pypi.python.org/pypi/argparse>`_
 * `protobuf <https://pypi.python.org/pypi/protobuf>`_
 * `psutil <https://pypi.python.org/pypi/psutil>`_
+* `supervisor <https://pypi.python.org/pypi/supervisor>`_
 
 The psutil package uses C extensions, and installing the package from source or
 with a python package manager (such as ``pip``) will require build tools.
@@ -58,20 +59,13 @@ Supermann should never send events with a nil host, and will always use the curr
 Licence
 -------
 
-Supermann is licensed under the `MIT Licence`_.
-
-The protocol buffer definition is sourced from the `Riemann Java client`_,
-which is licensed under the `Apache Licence`_.
+Supermann is licensed under the `MIT Licence <http://opensource.org/licenses/MIT>`_. The protocol buffer definition is sourced from the `Riemann Java client <https://github.com/aphyr/riemann-java-client/blob/0c4a1a255be6f33069d7bb24d0cc7efb71bf4bc8/src/main/proto/riemann/proto.proto>`_,
+which is licensed under the `Apache Licence <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
 Authors
 -------
 
-Supermann was written by `Sam Clements`_, while working at `DataSift`_.
+Supermann was written by `Sam Clements <https://github.com/borntyping>`_, while working at `DataSift <https://datasift.com>`_.
 
-.. _Supervisor: http://supervisord.org/
-.. _Riemann: http://riemann.io/
-.. _Riemann Java client: https://github.com/aphyr/riemann-java-client/blob/0c4a1a255be6f33069d7bb24d0cc7efb71bf4bc8/src/main/proto/riemann/proto.proto
-.. _MIT Licence: http://opensource.org/licenses/MIT
-.. _Apache Licence: http://www.apache.org/licenses/LICENSE-2.0
-.. _Sam Clements: https://github.com/borntyping
-.. _DataSift: https://datasift.com
+.. image:: https://0.gravatar.com/avatar/8dd5661684a7385fe723b7e7588e91ee?d=https%3A%2F%2Fidenticons.github.com%2Fe83ef7586374403a328e175927b98cac.png&r=x&s=40
+.. image:: https://1.gravatar.com/avatar/a3a6d949b43b6b880ffb3e277a65f49d?d=https%3A%2F%2Fidenticons.github.com%2F065affbc170e2511eeacb3bd0e975ec1.png&r=x&s=40
