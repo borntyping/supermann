@@ -35,10 +35,17 @@ def configure_logging(level=logging.INFO):
 def formatter_class(*args, **kwargs):
     """Builds a modified argparse formatter"""
     kwargs.setdefault('max_help_position', 32)
+    kwargs.setdefault('width', 96)
     return argparse.ArgumentDefaultsHelpFormatter(*args, **kwargs)
 
 
 parser = argparse.ArgumentParser(formatter_class=formatter_class)
+parser.add_argument(
+    '-v', '--version', action='version',
+    version='Supermann v{version} by {author}'.format(
+        version=supermann.__version__,
+        author=supermann.__author__),
+    help="Show this programs version and exit")
 parser.add_argument(
     '-l', '--log-level', metavar='LEVEL',
     default='INFO', choices=LOG_LEVELS.keys(),
