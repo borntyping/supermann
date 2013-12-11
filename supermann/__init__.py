@@ -4,6 +4,6 @@ from __future__ import absolute_import, unicode_literals
 
 from supermann.core import Supermann
 
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __author__ = 'Sam Clements <sam.clements@datasift.com>'
 __all__ = ['Supermann']

@@ -44,9 +44,9 @@ class Supermann(object):
                 self.emit_processes(event=event)
                 # Send the queued events at the end of the cycle
                 self.riemann.send_next_message()
-        except Exception:
+        except Exception as exception:
             self.log.exception("A fatal exception has occurred:")
-            traceback.print_exc()
+            raise exception
         finally:
             # Ensure the Riemann client is closed if we crash
             self.riemann.disconnect()
