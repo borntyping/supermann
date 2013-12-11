@@ -9,7 +9,7 @@ def cpu(self, event):
     """Returns the systems total CPU and memory usage"""
     self.riemann.event(
         service='system:cpu:percent',
-        metric_f=psutil.cpu_percent(interval=0))
+        metric_f=psutil.cpu_percent(interval=None))
 
 
 def mem(self, event):

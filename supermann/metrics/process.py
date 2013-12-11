@@ -22,7 +22,7 @@ def running_process(function):
 def cpu(sender, process, name, **data):
     sender.riemann.event(
         service='process:{name}:cpu:percent'.format(name=name),
-        metric_f=process.get_cpu_percent(interval=0.0))
+        metric_f=process.get_cpu_percent(interval=None))
 
 
 @running_process
