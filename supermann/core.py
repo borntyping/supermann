@@ -54,11 +54,12 @@ class Supermann(object):
     def emit_processes(self, event):
         """Emit a signal for each Supervisor child process"""
         for data in self.supervisor.rpc.getAllProcessInfo():
-            try:
-                process = psutil.Process(data['pid'])
-            except psutil.NoSuchProcess:
-                process = None
+            process = self._get_process(data.pop('pid'))
             supermann.signals.process.send(self, process=process, **data)
+
+    def _get_process(self, pid):
+        """Returns a psutil.Process object, or None if the PID is 0"""
+        return psutil.Process(pid) if (pid != 0) else None
 
     def check_supervisor(self):
         """Checks that Supermann is correctly running under Supervisor"""
