@@ -4,12 +4,11 @@ from __future__ import absolute_import, unicode_literals
 
 import collections
 import os
-import traceback
 
 import psutil
+import riemann
 
 import supermann.metrics
-import supermann.riemann.client
 import supermann.signals
 import supermann.supervisor
 
@@ -17,17 +16,16 @@ import supermann.supervisor
 class Supermann(object):
     """The main Supermann process"""
 
-    def __init__(self, host='localhost', port=5555):
+    def __init__(self, host=None, port=None):
         self.log = supermann.utils.getLogger(self)
         self.log.info("This looks like a job for Supermann!")
-
         self.actions = collections.defaultdict(list)
 
-        # The Supervisor interface reads configuration from the environment
+        # The Supervisor and Riemann clients read their configuration from
+        # the environment, though the Riemann client can be overridden
         self.supervisor = supermann.supervisor.Supervisor()
-
-        # But Riemann does need configuring
-        self.riemann = supermann.riemann.client.UDPClient(host, port)
+        self.riemann_transport = riemann.client.TCPTransport(host, port)
+        self.riemann = riemann.client.QueuedClient(self.riemann_transport)
 
     def connect(self, signal, reciver):
         """Connects a signal that will recive messages from this instance"""
@@ -43,7 +41,7 @@ class Supermann(object):
                 # Emit a signal for each Supervisor subprocess
                 self.emit_processes(event=event)
                 # Send the queued events at the end of the cycle
-                self.riemann.send_next_message()
+                self.riemann.flush()
         except Exception as exception:
             self.log.exception("A fatal exception has occurred:")
             raise exception
