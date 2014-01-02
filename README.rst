@@ -2,6 +2,12 @@
 Supermann
 =========
 
+.. image:: https://pypip.in/v/supermann/badge.png
+    :target: https://pypi.python.org/pypi/supermann
+
+.. image:: https://travis-ci.org/borntyping/supermann.png?branch=master
+    :target: https://travis-ci.org/borntyping/supermann
+
 Supermann monitors processes running under `Supervisor <http://supervisord.org/>`_ and sends metrics to `Riemann <http://riemann.io/>`_.
 
 Requirements
