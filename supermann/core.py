@@ -6,7 +6,8 @@ import collections
 import os
 
 import psutil
-import riemann
+import riemann.client
+import riemann.transport
 
 import supermann.metrics
 import supermann.signals
@@ -24,7 +25,7 @@ class Supermann(object):
         # The Supervisor and Riemann clients read their configuration from
         # the environment, though the Riemann client can be overridden
         self.supervisor = supermann.supervisor.Supervisor()
-        self.riemann_transport = riemann.client.TCPTransport(host, port)
+        self.riemann_transport = riemann.transport.TCPTransport(host, port)
         self.riemann = riemann.client.QueuedClient(self.riemann_transport)
 
     def connect(self, signal, reciver):
@@ -33,21 +34,18 @@ class Supermann(object):
 
     def run(self):
         """Runs forever, ensuring Riemann is disconnected properly"""
-        try:
-            self.riemann.connect()
-            for event in self.supervisor.run_forever():
-                # Emit a signal for each event
-                supermann.signals.event.send(self, event=event)
-                # Emit a signal for each Supervisor subprocess
-                self.emit_processes(event=event)
-                # Send the queued events at the end of the cycle
-                self.riemann.flush()
-        except Exception as exception:
-            self.log.exception("A fatal exception has occurred:")
-            raise exception
-        finally:
-            # Ensure the Riemann client is closed if we crash
-            self.riemann.disconnect()
+        with self.riemann:
+            try:
+                for event in self.supervisor.run_forever():
+                    # Emit a signal for each event
+                    supermann.signals.event.send(self, event=event)
+                    # Emit a signal for each Supervisor subprocess
+                    self.emit_processes(event=event)
+                    # Send the queued events at the end of the cycle
+                    self.riemann.flush()
+            except Exception as exception:
+                self.log.exception("A fatal exception has occurred:")
+                raise exception
 
     def emit_processes(self, event):
         """Emit a signal for each Supervisor child process"""
