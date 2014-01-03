@@ -45,4 +45,4 @@ def fds(sender, process, name, **data):
 def state(sender, process, name, **data):
     sender.riemann.event(
         service='process:{name}:state'.format(name=name),
-        state=data['statename'])
+        state=data['statename'], metric_f=data['state'])
