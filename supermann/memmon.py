@@ -14,8 +14,10 @@ class MemoryMonitor(object):
         return cls(processes)
 
     def __init__(self, processes=None):
-        self.log = supermann.utils.getLogger(self)
         self.processes = processes or dict()
+        self.log = supermann.utils.getLogger(self)
+        self.log.info("Memory monitoring processes: {0}".format(
+            ', '.join(self.processes.keys())))
 
     def process(self, sender, process, name, **data):
         """Recives supermann.signals.process"""
@@ -31,4 +33,3 @@ class MemoryMonitor(object):
         sender.supervisor.rpc.stopProcess(name)
         self.log.debug("Starting process {0}".format(name))
         sender.supervisor.rpc.startProcess(name, wait=False)
-
