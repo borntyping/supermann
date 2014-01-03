@@ -4,6 +4,7 @@ import argparse
 import logging
 
 import supermann.core
+import supermann.memmon
 import supermann.metrics
 import supermann.metrics.system
 import supermann.metrics.process
@@ -56,6 +57,9 @@ parser.add_argument(
 parser.add_argument(
     'port', type=int, nargs='?', default=None,
     help="The Riemann server to connect to")
+parser.add_argument(
+    '-m', '--memmon', metavar='process=limit', action='append', default=[],
+    help="A memory limit for a process")
 
 
 def main():
@@ -78,6 +82,11 @@ def main():
     self.connect(supermann.signals.process, supermann.metrics.process.mem)
     self.connect(supermann.signals.process, supermann.metrics.process.fds)
     self.connect(supermann.signals.process, supermann.metrics.process.state)
+
+    # Monitor process memory
+    if args.memmon:
+        memmon = supermann.memmon.MemoryMonitor.from_args(args.memmon)
+        self.connect(supermann.signals.process, memmon.process)
 
     # Supermann will attempt to run forever
     self.run()
