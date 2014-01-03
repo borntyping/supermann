@@ -7,7 +7,7 @@ import sys
 
 setuptools.setup(
     name = "supermann",
-    version = '1.3.0',
+    version = '1.3.1',
 
     author = "Sam Clements",
     author_email = "sam.clements@datasift.com",
@@ -23,7 +23,7 @@ setuptools.setup(
         'blinker==1.3',
         'protobuf==2.5.0',
         'psutil==1.2.0',
-        'riemann-client==2.0.1',
+        'riemann-client==2.1.0',
         'supervisor==3.0',
     ],
 
