@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import argparse
-import logging
+import shlex
 
 import supermann.core
 import supermann.memmon
@@ -11,36 +11,26 @@ import supermann.metrics.process
 import supermann.signals
 
 
-LOG_FORMAT = '%(asctime)s %(levelname)-8s [%(name)s] %(message)s'
-
-LOG_LEVELS = {
-    'CRITICAL': logging.CRITICAL,
-    'ERROR': logging.ERROR,
-    'WARNING': logging.WARNING,
-    'INFO': logging.INFO,
-    'DEBUG': logging.DEBUG,
-}
-
-
-def configure_logging(level=logging.INFO):
-    """This configures the supermann log to output to the console"""
-    if isinstance(level, basestring):
-        level = LOG_LEVELS.get(level)
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter(LOG_FORMAT))
-    log = logging.getLogger('supermann')
-    log.setLevel(level)
-    log.addHandler(handler)
-
-
-def formatter_class(*args, **kwargs):
+def CustomHelpFormatter(*args, **kwargs):
     """Builds a modified argparse formatter"""
     kwargs.setdefault('max_help_position', 32)
     kwargs.setdefault('width', 96)
     return argparse.HelpFormatter(*args, **kwargs)
 
 
-parser = argparse.ArgumentParser(formatter_class=formatter_class)
+class ShlexArgumentParser(argparse.ArgumentParser):
+    """Reads argument files using shlex"""
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault('fromfile_prefix_chars', '@')
+        super(ShlexArgumentParser, self).__init__(**kwargs)
+
+    def convert_arg_line_to_args(self, line):
+        for arg in shlex.split(line):
+            yield arg
+
+
+parser = ShlexArgumentParser(formatter_class=CustomHelpFormatter)
 parser.add_argument(
     '-v', '--version', action='version',
     version='Supermann v{version} by {author}'.format(
@@ -49,7 +39,7 @@ parser.add_argument(
     help="Show this programs version and exit")
 parser.add_argument(
     '-l', '--log-level', metavar='LEVEL',
-    default='INFO', choices=LOG_LEVELS.keys(),
+    default='INFO', choices=supermann.utils.LOG_LEVELS.keys(),
     help="One of CRITICAL, ERROR, WARNING, INFO, DEBUG")
 parser.add_argument(
     'host', type=str, nargs='?', default=None,
@@ -66,7 +56,7 @@ def main():
     args = parser.parse_args()
 
     # Log messages are sent to stderr, and Supervisor takes care of the rest
-    configure_logging(args.log_level)
+    supermann.utils.configure_logging(args.log_level)
 
     # Create a Supermann instance, and check it is running under Supervisord
     self = supermann.core.Supermann(host=args.host, port=args.port)

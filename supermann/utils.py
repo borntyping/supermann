@@ -4,12 +4,26 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+LOG_FORMAT = '%(asctime)s %(levelname)-8s [%(name)s] %(message)s'
 
-class NullHandler(logging.Handler):
-    def emit(self, record):
-        pass
+LOG_LEVELS = {
+    'CRITICAL': logging.CRITICAL,
+    'ERROR': logging.ERROR,
+    'WARNING': logging.WARNING,
+    'INFO': logging.INFO,
+    'DEBUG': logging.DEBUG,
+}
 
-logging.getLogger('supermann').addHandler(NullHandler())
+
+def configure_logging(level=logging.INFO, format=LOG_FORMAT, log='supermann'):
+    """This configures a logger to output to the console"""
+    if isinstance(level, basestring):
+        level = LOG_LEVELS.get(level)
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(format))
+    log = logging.getLogger(log)
+    log.setLevel(level)
+    log.addHandler(handler)
 
 
 def fullname(obj):

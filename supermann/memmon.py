@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import supermann.utils
 
+
 class MemoryMonitor(object):
     @classmethod
     def from_args(cls, process_list):
