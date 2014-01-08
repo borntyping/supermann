@@ -75,7 +75,7 @@ def main():
 
     # Monitor process memory
     if args.memmon:
-        memmon = supermann.memmon.MemoryMonitor.from_args(args.memmon)
+        memmon = supermann.memmon.MemoryMonitor.from_args(*args.memmon)
         self.connect(supermann.signals.process, memmon.process)
 
     # Supermann will attempt to run forever

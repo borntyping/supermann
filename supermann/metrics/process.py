@@ -11,10 +11,12 @@ def running_process(function):
     """Decorates a signals.process reciver to only run if the process exists"""
     @functools.wraps(function)
     def wrapper(sender, process, **data):
-        if process:
+        if process is None:
+            log = supermann.utils.getLogger(function)
+            log.debug("Process '{0}' does not exist ({1})".format(
+                data['name'], data['statename']))
+        else:
             return function(sender, process, **data)
-        log = supermann.utils.getLogger(function)
-        log.debug("Process {name} does not exist ({statename})".format(**data))
     return wrapper
 
 
