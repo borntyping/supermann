@@ -58,9 +58,8 @@ def main():
     # Log messages are sent to stderr, and Supervisor takes care of the rest
     supermann.utils.configure_logging(args.log_level)
 
-    # Create a Supermann instance, and check it is running under Supervisord
+    # Create a Supermann instance
     self = supermann.core.Supermann(host=args.host, port=args.port)
-    self.check_supervisor()
 
     # Collect system metrics when an event is received
     self.connect(supermann.signals.event, supermann.metrics.system.cpu)
@@ -78,5 +77,6 @@ def main():
         memmon = supermann.memmon.MemoryMonitor.from_args(*args.memmon)
         self.connect(supermann.signals.process, memmon.process)
 
-    # Supermann will attempt to run forever
+    # Supermann will attempt to run forever, after checking Supervisord
+    self.check_supervisor()
     self.run()
