@@ -6,8 +6,8 @@ import collections
 import os
 
 import psutil
-import riemann.client
-import riemann.transport
+import riemann_client.client
+import riemann_client.transport
 
 import supermann.metrics
 import supermann.signals
@@ -22,11 +22,12 @@ class Supermann(object):
         self.log.info("This looks like a job for Supermann!")
         self.actions = collections.defaultdict(list)
 
-        # The Supervisor and Riemann clients read their configuration from
-        # the environment, though the Riemann client can be overridden
+        # The Supervisor listener and client take their configuration from
+        # the environment variables provided by Supervisor
         self.supervisor = supermann.supervisor.Supervisor()
-        self.riemann_transport = riemann.transport.TCPTransport(host, port)
-        self.riemann = riemann.client.QueuedClient(self.riemann_transport)
+
+        self.riemann = riemann_client.client.QueuedClient(
+            riemann_client.transport.TCPTransport(host, port))
 
     def connect(self, signal, reciver):
         """Connects a signal that will recive messages from this instance"""
