@@ -42,10 +42,10 @@ parser.add_argument(
     default='INFO', choices=supermann.utils.LOG_LEVELS.keys(),
     help="One of CRITICAL, ERROR, WARNING, INFO, DEBUG")
 parser.add_argument(
-    'host', type=str, nargs='?', default=None,
+    'host', type=str, nargs='?', default='localhost',
     help="The Riemann server to connect to")
 parser.add_argument(
-    'port', type=int, nargs='?', default=None,
+    'port', type=int, nargs='?', default=5555,
     help="The Riemann server to connect to")
 parser.add_argument(
     '-m', '--memmon', metavar='process=limit', action='append', default=[],
