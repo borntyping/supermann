@@ -71,6 +71,7 @@ def main():
     self.connect(supermann.signals.process, supermann.metrics.process.mem)
     self.connect(supermann.signals.process, supermann.metrics.process.fds)
     self.connect(supermann.signals.process, supermann.metrics.process.state)
+    self.connect(supermann.signals.process, supermann.metrics.process.uptime)
 
     # Monitor process memory
     if args.memmon:

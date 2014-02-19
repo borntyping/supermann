@@ -13,7 +13,7 @@ def running_process(function):
     def wrapper(sender, process, **data):
         if process is None:
             log = supermann.utils.getLogger(function)
-            log.debug("Process '{0}' does not exist ({1})".format(
+            log.debug("Process '{0}' does not exist (state: {1})".format(
                 data['name'], data['statename']))
         else:
             return function(sender, process, **data)
@@ -48,3 +48,9 @@ def state(sender, process, name, **data):
     sender.riemann.event(
         service='process:{name}:state'.format(name=name),
         state=data['statename'])
+
+
+def uptime(sender, process, name, start, stop, now, **data):
+    sender.riemann.event(
+        service='process:{name}:uptime'.format(name=name),
+        metric_f=(now - start if (process is not None) else stop - start))
