@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import collections
 import os
+import sys
 
 import psutil
 import riemann_client.client
@@ -29,6 +30,11 @@ class Supermann(object):
         self.riemann = riemann_client.client.QueuedClient(
             riemann_client.transport.TCPTransport(host, port))
 
+        # This sets an exception handler to deal with uncaught exceptions -
+        # this is used to ensure both a log message (and more importantly, a
+        # timestamp) and a full traceback is output to stderr
+        self.set_exception_handler()
+
     def connect(self, signal, reciver):
         """Connects a signal that will recive messages from this instance"""
         return signal.connect(reciver, sender=self)
@@ -36,17 +42,21 @@ class Supermann(object):
     def run(self):
         """Runs forever, ensuring Riemann is disconnected properly"""
         with self.riemann:
-            try:
-                for event in self.supervisor.run_forever():
-                    # Emit a signal for each event
-                    supermann.signals.event.send(self, event=event)
-                    # Emit a signal for each Supervisor subprocess
-                    self.emit_processes(event=event)
-                    # Send the queued events at the end of the cycle
-                    self.riemann.flush()
-            except Exception as exception:
-                self.log.exception("A fatal exception has occurred:")
-                raise exception
+            for event in self.supervisor.run_forever():
+                # Emit a signal for each event
+                supermann.signals.event.send(self, event=event)
+                # Emit a signal for each Supervisor subprocess
+                self.emit_processes(event=event)
+                # Send the queued events at the end of the cycle
+                self.riemann.flush()
+
+    def set_exception_handler(self):
+        """Sets Supermann.exception_handler as the global exception handler"""
+        sys.excepthook = self.exception_handler
+
+    def exception_handler(self, *exc_info):
+        """Ensures exceptions are logged"""
+        self.log.error("A fatal exception occurred:", exc_info=exc_info)
 
     def emit_processes(self, event):
         """Emit a signal for each Supervisor child process"""
