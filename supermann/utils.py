@@ -15,7 +15,7 @@ LOG_LEVELS = {
 }
 
 
-def configure_logging(level=logging.INFO, format=LOG_FORMAT, log='supermann'):
+def configure_logging(level=logging.INFO, format=LOG_FORMAT, log=''):
     """This configures a logger to output to the console"""
     if isinstance(level, basestring):
         level = LOG_LEVELS.get(level)

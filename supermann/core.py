@@ -82,3 +82,9 @@ class Supermann(object):
             return False
 
         return True
+
+    def check_riemann(self):
+        """Adds some basic information about the Riemann server to the log"""
+        log = supermann.utils.getLogger(self.riemann)
+        log.info("Using Riemann protobuf server at {0}:{1}".format(
+            *self.riemann.transport.address))
