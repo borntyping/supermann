@@ -3,11 +3,10 @@
 from __future__ import unicode_literals
 
 import setuptools
-import sys
 
 setuptools.setup(
     name = "supermann",
-    version = '1.8.1',
+    version = '2.0.0',
 
     author = "Sam Clements",
     author_email = "sam.clements@datasift.com",
@@ -19,18 +18,16 @@ setuptools.setup(
     packages = setuptools.find_packages(),
 
     install_requires = [
-        'argparse==1.1',
-        'blinker==1.3',
-        'protobuf==2.5.0',
-        'psutil==1.2.0',
-        'riemann-client>=3.0.3',
-        'supervisor==3.0',
+        'argparse>=1.1',
+        'blinker>=1.1',
+        'psutil>=0.6.1',
+        'riemann-client>=4.0.0',
+        'supervisor>=3.0',
     ],
 
     entry_points = {
         'console_scripts': [
-            'supermann = supermann.command:main',
-            'supermann-{0}.{1} = supermann.command:main'.format(*sys.version_info)
+            'supermann = supermann.command:main'
         ]
     },
 
