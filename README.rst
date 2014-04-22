@@ -32,7 +32,9 @@ The ``--memmon`` option takes the name of a Supervisor program, and a memory lim
 Installation
 ------------
 
-Supermann can be installed with ``pip install supermann``. Supervisor can also be installed with ``pip``, or can be installed from your distributions package manager. Once Supermann is installed, add an ``eventlistener`` section to the Supervisor configuration (``/etc/supervisord.conf`` by default) and restart Supervisor.
+Supermann can be installed with ``pip install supermann``, or you can use the provided makefile to build and distribute an RPM using [fpm](https://github.com/jordansissel/fpm).
+
+Supervisor can also be installed with ``pip``, or can be installed from your distributions package manager. Once Supermann is installed, add an ``eventlistener`` section to the Supervisor configuration (``/etc/supervisord.conf`` by default) and restart Supervisor.
 
 Requirements
 ^^^^^^^^^^^^

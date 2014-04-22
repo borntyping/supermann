@@ -70,7 +70,7 @@ class Supermann(object):
 
     def check_supervisor(self):
         """Checks that Supermann is correctly running under Supervisor"""
-        process = psutil.Process()
+        process = psutil.Process(os.getpid())
 
         self.log.info("Supermann process PID is: {0}".format(process.pid))
 

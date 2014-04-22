@@ -1,12 +1,65 @@
+# Uses fpm (https://github.com/jordansissel/fpm) to build a CentOS 6 RPM
+
+vendor="Sam Clements <sam.clements@datasift.com>"
+
+define fpm
+	@mkdir -p dist
+	fpm -s python -t rpm --package $@ --vendor ${vendor} --epoch 1
+endef
+
+
 version=$(shell python setup.py --version)
-release=$(shell grep Release supermann.spec | awk '{ print $$2 }')
+release=1
 
-package=supermann-${version}-${release}.noarch.rpm
-tarball=${HOME}/rpmbuild/SOURCES/supermann-${version}.tar.gz
+supermann:
+	${fpm} --version ${version} --iteration ${release}el5 \
+	--no-python-fix-name setup.py
 
-dist/${package}: supermann.spec ${tarball}
-	rpmbuild -ba supermann.spec
-	rsync -a ${HOME}/rpmbuild/RPMS/noarch/${package} dist/${package}
 
-${tarball}: $(shell find supermann)
-	tar -zcf ${tarball} . --exclude-vcs --transform='s/./supermann-${version}/'
+el5: supermann.el5 blinker.el5
+
+supermann.el5: dist/supermann-${version}-${release}el5.noarch.rpm
+
+dist/supermann-${version}-${release}el5.noarch.rpm:
+	${fpm} --version ${version} --iteration ${release}el5 \
+	--python-package-name-prefix python26 \
+	--no-python-fix-name \
+	--no-python-dependencies \
+	--depends 'python(abi) = 2.6' \
+	--depends 'python26-argparse >= 1.1' \
+	--depends 'python26-blinker >= 1.1' \
+	--depends 'python26-psutil >= 0.6.1' \
+	--depends 'python26-riemann-client >= 4.0.0' \
+	--depends 'supervisor = 3.0' \
+	setup.py
+
+blinker_version=1.1
+blinker_release=1
+
+blinker.el5: \
+	dist/python26-blinker-${blinker_version}-${blinker_release}el5.noarch.rpm
+
+dist/python26-blinker-${blinker_version}-${blinker_release}el5.noarch.rpm:
+	${fpm} --version ${blinker_version} --iteration ${blinker_release}el5 \
+	--python-package-name-prefix python26 \
+	blinker
+
+
+el6: supermann.el6
+
+supermann.el6: dist/supermann-${version}-${release}el6.noarch.rpm
+
+dist/supermann-${version}-${release}el6.noarch.rpm:
+	${fpm} --version ${version} --iteration ${release}el6 \
+	--no-python-fix-name \
+	--no-python-dependencies \
+	--depends 'python(abi) = 2.6' \
+	--depends 'python-argparse >= 1.1' \
+	--depends 'python-blinker >= 1.1' \
+	--depends 'python-psutil >= 0.6.1' \
+	--depends 'python-riemann-client >= 4.0.0' \
+	--depends 'supervisor = 3.0' \
+	setup.py
+
+
+.PHONY: el5 el6 supermann.el5 blinker.el5 supermann.el6
