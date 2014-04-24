@@ -8,20 +8,27 @@ define fpm
 endef
 
 
+default:
+	@echo "Usage:"
+	@echo "  make supermann - build generic Supermann RPM"
+	@echo "  make el6 - build CentOS 6 Supermann RPM"
+	@echo "  make el5 - build CentOS 5 Supermann and blinker RPM"
+
+
 version=$(shell python setup.py --version)
-release=1
+release=2
 
 supermann:
-	${fpm} --version ${version} --iteration ${release}el5 \
+	${fpm} --version ${version} --iteration ${release} \
 	--no-python-fix-name setup.py
 
 
 el5: supermann.el5 blinker.el5
 
-supermann.el5: dist/supermann-${version}-${release}el5.noarch.rpm
+supermann.el5: dist/supermann-${version}-${release}.el5.noarch.rpm
 
-dist/supermann-${version}-${release}el5.noarch.rpm:
-	${fpm} --version ${version} --iteration ${release}el5 \
+dist/supermann-${version}-${release}.el5.noarch.rpm:
+	${fpm} --version ${version} --iteration ${release}.el5 \
 	--python-package-name-prefix python26 \
 	--no-python-fix-name \
 	--no-python-dependencies \
@@ -34,23 +41,23 @@ dist/supermann-${version}-${release}el5.noarch.rpm:
 	setup.py
 
 blinker_version=1.1
-blinker_release=1
+blinker_release=2
 
 blinker.el5: \
-	dist/python26-blinker-${blinker_version}-${blinker_release}el5.noarch.rpm
+	dist/python26-blinker-${blinker_version}-${blinker_release}.el5.noarch.rpm
 
-dist/python26-blinker-${blinker_version}-${blinker_release}el5.noarch.rpm:
-	${fpm} --version ${blinker_version} --iteration ${blinker_release}el5 \
+dist/python26-blinker-${blinker_version}-${blinker_release}.el5.noarch.rpm:
+	${fpm} --version ${blinker_version} --iteration ${blinker_release}.el5 \
 	--python-package-name-prefix python26 \
 	blinker
 
 
 el6: supermann.el6
 
-supermann.el6: dist/supermann-${version}-${release}el6.noarch.rpm
+supermann.el6: dist/supermann-${version}-${release}.el6.noarch.rpm
 
-dist/supermann-${version}-${release}el6.noarch.rpm:
-	${fpm} --version ${version} --iteration ${release}el6 \
+dist/supermann-${version}-${release}.el6.noarch.rpm:
+	${fpm} --version ${version} --iteration ${release}.el6 \
 	--no-python-fix-name \
 	--no-python-dependencies \
 	--depends 'python(abi) = 2.6' \
@@ -62,4 +69,4 @@ dist/supermann-${version}-${release}el6.noarch.rpm:
 	setup.py
 
 
-.PHONY: el5 el6 supermann.el5 blinker.el5 supermann.el6
+.PHONY: el5 el6 supermann.el5 blinker.el5 supermann.el6 default
