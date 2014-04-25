@@ -52,5 +52,5 @@ def state(sender, process, data):
 
 def uptime(sender, process, data):
     sender.riemann.event(
-        service='process:{name}:uptime'.format(name=name),
-        metric_f=(now - start if (process is not None) else stop - start))
+        service='process:{name}:uptime'.format(**data),
+        metric_f=data['stop' if process is None else 'now'] - data['start'])
