@@ -73,7 +73,7 @@ class Supermann(object):
             cache[pid] = self._get_process(pid)
             self.log.debug("Emitting signal for process {0}({1})".format(
                 data['name'], pid))
-            supermann.signals.process.send(self, process=cache[pid], **data)
+            supermann.signals.process.send(self, process=cache[pid], data=data)
 
         self.process_cache = cache
 
