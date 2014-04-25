@@ -25,6 +25,9 @@ def cpu(sender, process, data):
     sender.riemann.event(
         service='process:{name}:cpu:percent'.format(**data),
         metric_f=process.get_cpu_percent(interval=None))
+    sender.riemann.event(
+        service='process:{name}:cpu:absolute'.format(**data),
+        metric_f=sum(process.get_cpu_times()))
 
 
 @running_process
