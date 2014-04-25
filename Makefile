@@ -10,7 +10,7 @@ endef
 
 default:
 	@echo "Usage:"
-	@echo "  make supermann - build generic Supermann RPM"
+	@echo "  make all - build a generic RPM, source distribution and wheel"
 	@echo "  make el6 - build CentOS 6 Supermann RPM"
 	@echo "  make el5 - build CentOS 5 Supermann and blinker RPM"
 
@@ -18,7 +18,18 @@ default:
 version=$(shell python setup.py --version)
 release=2
 
-supermann:
+all: \
+	dist/supermann-${version}-${release}.noarch.rpm \
+	dist/supermann-${version}-py27-none-any.whl \
+	dist/supermann-${version}.tar.gz
+
+dist/supermann-${version}.tar.gz:
+	python setup.py sdist
+
+dist/supermann-${version}-py27-none-any.whl:
+	python setup.py bdist_wheel
+
+dist/supermann-${version}-${release}.noarch.rpm:
 	${fpm} --version ${version} --iteration ${release} \
 	--no-python-fix-name setup.py
 
