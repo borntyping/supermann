@@ -21,7 +21,9 @@ class Supermann(object):
     def __init__(self, host=None, port=None):
         self.log = supermann.utils.getLogger(self)
         self.log.info("This looks like a job for Supermann!")
+
         self.actions = collections.defaultdict(list)
+        self.process_cache = dict()
 
         # The Supervisor listener and client take their configuration from
         # the environment variables provided by Supervisor
@@ -59,14 +61,40 @@ class Supermann(object):
         self.log.error("A fatal exception occurred:", exc_info=exc_info)
 
     def emit_processes(self, event):
-        """Emit a signal for each Supervisor child process"""
+        """Emit a signal for each Supervisor child process
+
+        A new cache is created from the processes emitted in this cycle, which
+        drops processes that no longer exist from the cache.
+        """
+        cache = dict()
+
         for data in self.supervisor.rpc.getAllProcessInfo():
-            process = self._get_process(data.pop('pid'))
-            supermann.signals.process.send(self, process=process, **data)
+            pid = data.pop('pid')
+            cache[pid] = self._get_process(pid)
+            self.log.debug("Emitting signal for process {0}({1})".format(
+                data['name'], pid))
+            supermann.signals.process.send(self, process=cache[pid], **data)
+
+        self.process_cache = cache
 
     def _get_process(self, pid):
-        """Returns a psutil.Process object, or None if the PID is 0"""
-        return psutil.Process(pid) if (pid != 0) else None
+        """Returns a psutil.Process object or None for a PID
+
+        Returns None is the PID is 0, which Supervisor uses for a dead process
+        Returns a process from the cache if one exists with the same PID, or a
+        new Process instance if the PID has not been cached.
+
+        The cache is used because psutil.Process.get_cpu_percent(interval=0)
+        stores state. When get_cpu_percent is next called, it returns the CPU
+        utilisation since the last call - creating a new instance each cycle
+        breaks this.
+        """
+        if pid == 0:
+            return None
+        elif pid in self.process_cache:
+            return self.process_cache[pid]
+        else:
+            return psutil.Process(pid)
 
     def check_supervisor(self):
         """Checks that Supermann is correctly running under Supervisor"""
