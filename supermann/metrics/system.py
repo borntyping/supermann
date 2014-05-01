@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import os
+
 import psutil
 
 
@@ -22,3 +24,10 @@ def swap(self, event):
     swap = psutil.swap_memory()
     self.riemann.event(service='system:swap:percent', metric_f=swap.percent)
     self.riemann.event(service='system:swap:absolute', metric_f=swap.used)
+
+
+def load(self, event):
+    load1, load5, load15 = os.getloadavg()
+    self.riemann.event(service='system:load:1min', metric_f=load1)
+    self.riemann.event(service='system:load:5min', metric_f=load5)
+    self.riemann.event(service='system:load:15min', metric_f=load15)

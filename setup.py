@@ -6,7 +6,7 @@ import setuptools
 
 setuptools.setup(
     name = "supermann",
-    version = '2.0.1',
+    version = '2.1.0',
 
     author = "Sam Clements",
     author_email = "sam.clements@datasift.com",
