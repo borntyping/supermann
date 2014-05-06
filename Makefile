@@ -17,7 +17,7 @@ default:
 
 
 version=$(shell python setup.py --version)
-release=1
+release=2
 
 all: \
 	dist/supermann-${version}-${release}.noarch.rpm \
@@ -42,6 +42,7 @@ supermann.el5: dist/supermann-${version}-${release}.el5.noarch.rpm
 dist/supermann-${version}-${release}.el5.noarch.rpm: ${sources}
 	${fpm} --version ${version} --iteration ${release}.el5 \
 	--python-package-name-prefix python26 \
+	--python-bin python2.6 \
 	--no-python-fix-name \
 	--no-python-dependencies \
 	--depends 'python(abi) = 2.6' \
@@ -70,6 +71,7 @@ supermann.el6: dist/supermann-${version}-${release}.el6.noarch.rpm
 
 dist/supermann-${version}-${release}.el6.noarch.rpm: ${sources}
 	${fpm} --version ${version} --iteration ${release}.el6 \
+	--python-bin python2.6 \
 	--no-python-fix-name \
 	--no-python-dependencies \
 	--depends 'python(abi) = 2.6' \
