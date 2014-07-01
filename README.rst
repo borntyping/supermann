@@ -45,7 +45,7 @@ Requirements
 * `riemann-client <https://pypi.python.org/pypi/riemann-client>`_
 * `supervisor <https://pypi.python.org/pypi/supervisor>`__
 
-The psutil package uses C extensions, and installing the package from source or with a python package manager (such as ``pip``) will require build tools. Alternatively, it can be installed from your distribution's repositories (``python-psutil`` on Debian and CentOS).
+The psutil package uses C extensions, and installing the package from source or with a python package manager (such as ``pip``) will require build tools. Alternatively, it can be installed from your distribution's repositories (``python-psutil`` on Debian and CentOS). Superman currently uses a very old version of psutil so as to remain compatible with CentOS.
 
 Supermann is developed and tested on Python 2.6. There are no plans to release it for Python 3, as Google's ``protobuf`` library (and therefore ``riemann-client``) are only compatible with Python 2.
 
