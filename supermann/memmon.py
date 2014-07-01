@@ -22,8 +22,10 @@ class MemoryMonitor(object):
         self.log.info("Memory monitoring processes: {0}".format(
             ', '.join(self.processes.keys())))
 
-    def process(self, sender, process, name, **data):
+    def process(self, sender, process, data):
         """Recives supermann.signals.process"""
+        name = data['name']
+
         if not process:
             self.log.debug("Process '{0}' is not availible".format(name))
             return
@@ -35,7 +37,7 @@ class MemoryMonitor(object):
                 self.restart_process(sender, name)
 
     def restart_process(self, sender, name):
-        self.log.info("Restarting process {0}".format(name))
+        self.log.warning("Process '{0}' reached the memory limit".format(name))
         self.log.debug("Stopping process {0}".format(name))
         sender.supervisor.rpc.stopProcess(name, wait=True)
         self.log.debug("Starting process {0}".format(name))

@@ -5,7 +5,7 @@ sources=$(shell find supermann -name '*.py') setup.py README.rst
 
 define fpm
 	@mkdir -p dist
-	fpm -s python -t rpm --package $@ --vendor ${vendor} --epoch 0
+	fpm -s python -t rpm --force --package $@ --vendor ${vendor} --epoch 0
 endef
 
 
@@ -14,10 +14,11 @@ default:
 	@echo "  make all - build a generic RPM, source distribution and wheel"
 	@echo "  make el6 - build CentOS 6 Supermann RPM"
 	@echo "  make el5 - build CentOS 5 Supermann and blinker RPM"
+	@echo "  make prepare - install build dependencies"
 
 
 version=$(shell python setup.py --version)
-release=3
+release=1
 
 all: \
 	dist/supermann-${version}-${release}.noarch.rpm \
@@ -34,6 +35,8 @@ dist/supermann-${version}-${release}.noarch.rpm: ${sources}
 	${fpm} --version ${version} --iteration ${release} \
 	--no-python-fix-name setup.py
 
+prepare:
+	pip install --upgrade setuptools wheel
 
 el5: supermann.el5 blinker.el5
 
@@ -83,4 +86,4 @@ dist/supermann-${version}-${release}.el6.noarch.rpm: ${sources}
 	setup.py
 
 
-.PHONY: default all el5 supermann.el5 blinker.el5 el6 supermann.el6
+.PHONY: default all el5 supermann.el5 blinker.el5 el6 supermann.el6 prepare
