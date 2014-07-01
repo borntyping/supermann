@@ -50,8 +50,7 @@ dist/supermann-${version}-${release}.el5.noarch.rpm: ${sources}
 	--no-python-dependencies \
 	--depends 'python26-argparse >= 1.1' \
 	--depends 'python26-blinker >= 1.1' \
-	--depends 'python26-psutil >= 0.6.1' \
-	--depends 'python26-psutil < 1.0.0' \
+	--depends 'python26-psutil = 0.6.1' \
 	--depends 'python26-riemann-client >= 4.0.0' \
 	--depends 'supervisor = 3.0' \
 	setup.py

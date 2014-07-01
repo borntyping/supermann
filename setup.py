@@ -6,7 +6,7 @@ import setuptools
 
 setuptools.setup(
     name = "supermann",
-    version = '2.1.1',
+    version = '2.1.2',
 
     author = "Sam Clements",
     author_email = "sam.clements@datasift.com",
@@ -20,7 +20,7 @@ setuptools.setup(
     install_requires = [
         'argparse>=1.1',
         'blinker>=1.1',
-        'psutil>=0.6.1,<1.0.0',
+        'psutil==0.6.1,==1.2.0',
         'riemann-client>=4.0.0',
         'supervisor>=3.0',
     ],
