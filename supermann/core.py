@@ -30,9 +30,9 @@ class Supermann(object):
         self.check_supervisor()
         self.supervisor = supermann.supervisor.Supervisor()
 
-        self.check_riemann(host, port)
         self.riemann = riemann_client.client.QueuedClient(
             riemann_client.transport.TCPTransport(host, port))
+        self.check_riemann(host, port)
 
         # This sets an exception handler to deal with uncaught exceptions -
         # this is used to ensure both a log message (and more importantly, a
