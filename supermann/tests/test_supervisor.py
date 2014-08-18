@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import os
 import StringIO
 
+import mock
 import py.test
 
 import supermann.supervisor
@@ -13,21 +14,13 @@ def local_file(name):
 
 
 @py.test.fixture
-def supervisor_stdin():
-    return open(local_file('supervisor.txt'), 'r').read()
-
-
-@py.test.fixture
-def listener(supervisor_stdin):
-    return supermann.supervisor.EventListener(
-        stdin=StringIO.StringIO(supervisor_stdin),
-        stdout=StringIO.StringIO(),
-        reserve_stdin=False,
-        reserve_stdout=False)
-
-
-def supervisor():
-    return supermann.supervisor.Supervisor()
+def listener():
+    with open(local_file('supervisor.txt'), 'r') as f:
+        return supermann.supervisor.EventListener(
+            stdin=StringIO.StringIO(f.read()),
+            stdout=StringIO.StringIO(),
+            reserve_stdin=False,
+            reserve_stdout=False)
 
 
 class TestEventListener(object):
@@ -52,10 +45,7 @@ class TestEventListener(object):
 
 
 class TestSupervisor(object):
-    def __init__(self):
-        py.test.monkeypatch.setattr(os, 'environ', {
-            'SUPERVISOR_SERVER_URL': 'unix:///dev/null'
-        })
-
-    def test_rpc_property(self):
+    @mock.patch.dict('os.environ', {'SUPERVISOR_SERVER_URL': '-'})
+    @mock.patch('supervisor.childutils.getRPCInterface')
+    def test_rpc_property(self, getRPCInterface):
         assert supermann.supervisor.Supervisor().rpc
