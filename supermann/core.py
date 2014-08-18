@@ -27,8 +27,10 @@ class Supermann(object):
 
         # The Supervisor listener and client take their configuration from
         # the environment variables provided by Supervisor
+        self.check_supervisor()
         self.supervisor = supermann.supervisor.Supervisor()
 
+        self.check_riemann(host, port)
         self.riemann = riemann_client.client.QueuedClient(
             riemann_client.transport.TCPTransport(host, port))
 
@@ -121,8 +123,7 @@ class Supermann(object):
 
         return True
 
-    def check_riemann(self):
+    def check_riemann(self, host, port):
         """Adds some basic information about the Riemann server to the log"""
         log = supermann.utils.getLogger(self.riemann)
-        log.info("Using Riemann protobuf server at {0}:{1}".format(
-            *self.riemann.transport.address))
+        log.info("Using Riemann protobuf server at {0}:{1}".format(host, port))

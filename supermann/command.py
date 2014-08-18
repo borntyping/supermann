@@ -79,10 +79,5 @@ def main():
         memmon = supermann.memmon.MemoryMonitor.from_args(*args.memmon)
         self.connect(supermann.signals.process, memmon.process)
 
-    # These methods check that Supermann is running as a child of the
-    # Supervisor process, and ensures basic information is logged
-    self.check_supervisor()
-    self.check_riemann()
-
     # Supermann will attempt to run forever
     self.run()
