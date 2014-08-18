@@ -45,7 +45,7 @@ def getAllProcessInfo():
 
 @py.test.fixture
 @mock.patch('supermann.supervisor.Supervisor', autospec=True)
-@mock.patch('riemann_client.client.QueuedClient', autospec=True)
+@mock.patch('riemann_client.transport.TCPTransport', autospec=True)
 def supermann_instance(riemann_client_class, supervisor_class):
     instance = Supermann(None, None)
     instance.supervisor.configure_mock(**{
@@ -75,14 +75,12 @@ def supermann_instance(riemann_client_class, supervisor_class):
     return instance
 
 
-def test_events_sent(supermann_instance):
-    assert supermann_instance.riemann.event.called
-    assert supermann_instance.riemann.flush.called
+def test_riemann_client(supermann_instance):
+    assert supermann_instance.riemann.transport.connect.called
 
 
-def test_number_of_events_created(supermann_instance):
-    """Checks that there are at least as many events as metrics"""
-    assert len(supermann_instance.riemann.event.call_args_list) >= 9
+def test_one_message_per_event(supermann_instance):
+    assert len(supermann_instance.riemann.transport.send.call_args_list) == 2
 
 
 def test_supervisor_rpc_called(supermann_instance):
