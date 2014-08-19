@@ -19,25 +19,31 @@ class Supermann(object):
     """The main Supermann process"""
 
     def __init__(self, host=None, port=None):
-        self.log = supermann.utils.getLogger(self)
-        self.log.info("This looks like a job for Supermann!")
-
         self.actions = collections.defaultdict(list)
         self.process_cache = dict()
+        self.log = supermann.utils.getLogger(self)
+
+        # Before connecting to Supervisor and Riemann, show when Supermann
+        # started up and which supervisord instance it is running under
+        process = psutil.Process(os.getpid())
+        self.log.info("This looks like a job for Supermann!")
+        self.log.debug("Supermann process PID is: {0}".format(process.pid))
+        self.log.debug("Parent process PID is: {0}".format(process.parent.pid))
 
         # The Supervisor listener and client take their configuration from
         # the environment variables provided by Supervisor
         self.supervisor = supermann.supervisor.Supervisor()
-        self.check_supervisor()
 
+        # The Riemann client uses the host and port passed on the command line
         self.riemann = riemann_client.client.QueuedClient(
             riemann_client.transport.TCPTransport(host, port))
-        self.check_riemann(host, port)
+        supermann.utils.getLogger(self.riemann).info(
+            "Using Riemann protobuf server at {0}:{1}".format(host, port))
 
         # This sets an exception handler to deal with uncaught exceptions -
         # this is used to ensure both a log message (and more importantly, a
         # timestamp) and a full traceback is output to stderr
-        self.set_exception_handler()
+        sys.excepthook = self.exception_handler
 
     def connect(self, signal, reciver):
         """Connects a signal that will recive messages from this instance"""
@@ -53,10 +59,6 @@ class Supermann(object):
                 self.emit_processes(event=event)
                 # Send the queued events at the end of the cycle
                 self.riemann.flush()
-
-    def set_exception_handler(self):
-        """Sets Supermann.exception_handler as the global exception handler"""
-        sys.excepthook = self.exception_handler
 
     def exception_handler(self, *exc_info):
         """Ensures exceptions are logged"""
@@ -97,33 +99,3 @@ class Supermann(object):
             return self.process_cache[pid]
         else:
             return psutil.Process(pid)
-
-    def check_supervisor(self):
-        """Checks that Supermann is correctly running under Supervisor"""
-        process = psutil.Process(os.getpid())
-
-        self.log.info("Supermann process PID is: {0}".format(process.pid))
-
-        # Check that Supermann has a parent process
-        if process.parent is None:
-            self.log.critical("Supermann has no parent process!")
-            return False
-
-        self.log.info("Parent process PID is: {0}".format(process.parent.pid))
-
-        # Check that the SUPERVISOR_SERVER_URL environment variable is set
-        if 'SUPERVISOR_SERVER_URL' not in os.environ:
-            self.log.critical("SUPERVISOR_SERVER_URL is not set!")
-            return False
-
-        # Check that the parent PID and the Supervisor PID match up
-        if process.parent.pid != self.supervisor.rpc.getPID():
-            self.log.critical("Supermann's parent process is not Supervisord!")
-            return False
-
-        return True
-
-    def check_riemann(self, host, port):
-        """Adds some basic information about the Riemann server to the log"""
-        log = supermann.utils.getLogger(self.riemann)
-        log.info("Using Riemann protobuf server at {0}:{1}".format(host, port))

@@ -74,8 +74,12 @@ class Supervisor(object):
 
     def __init__(self):
         self.log = supermann.utils.getLogger(self)
+
+        if 'SUPERVISOR_SERVER_URL' not in os.environ:
+            raise Exception("SUPERVISOR_SERVER_URL is not set!")
         self.log.info("Using Supervisor XML-RPC interface at {0}".format(
             os.environ['SUPERVISOR_SERVER_URL']))
+
         self.listener = EventListener()
         self.interface = supervisor.childutils.getRPCInterface(os.environ)
 
