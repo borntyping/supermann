@@ -20,8 +20,8 @@ setuptools.setup(
     install_requires = [
         'argparse>=1.1',
         'blinker>=1.1',
-        'psutil==0.6.1,==1.2.0',
-        'riemann-client>=4.0.0',
+        'psutil>=1.2.0',
+        'riemann-client>=5.0.0',
         'supervisor>=3.0',
     ],
 

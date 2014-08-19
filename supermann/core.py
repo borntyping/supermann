@@ -27,8 +27,8 @@ class Supermann(object):
 
         # The Supervisor listener and client take their configuration from
         # the environment variables provided by Supervisor
-        self.check_supervisor()
         self.supervisor = supermann.supervisor.Supervisor()
+        self.check_supervisor()
 
         self.riemann = riemann_client.client.QueuedClient(
             riemann_client.transport.TCPTransport(host, port))
