@@ -4,6 +4,8 @@ from __future__ import absolute_import, unicode_literals
 
 import functools
 
+import psutil
+
 import supermann.utils
 
 
@@ -32,19 +34,39 @@ def cpu(sender, process, data):
 
 @running_process
 def mem(sender, process, data):
+    rss, vms = process.memory_info()
     sender.riemann.event(
-        service='process:{name}:mem:percent'.format(name=data['name']),
+        service='process:{name}:mem:virt:absolute'.format(name=data['name']),
+        metric_f=vms)
+    sender.riemann.event(
+        service='process:{name}:mem:rss:absolute'.format(name=data['name']),
+        metric_f=rss)
+    sender.riemann.event(
+        service='process:{name}:mem:rss:percent'.format(name=data['name']),
         metric_f=process.memory_percent())
-    sender.riemann.event(
-        service='process:{name}:mem:absolute'.format(name=data['name']),
-        metric_f=process.memory_info()[0])
 
 
 @running_process
 def fds(sender, process, data):
+    num_fds = process.num_fds()
+    rlimit_fds = process.rlimit(psutil.RLIMIT_NOFILE)[1]
     sender.riemann.event(
-        service='process:{name}:fds'.format(**data),
-        metric_f=process.num_fds())
+        service='process:{name}:fds:absolute'.format(**data),
+        metric_f=num_fds)
+    sender.riemann.event(
+        service='process:{name}:fds:percent'.format(**data),
+        metric_f=(num_fds / rlimit_fds))
+
+
+@running_process
+def io(sender, process, data):
+    io_counters = process.io_counters()
+    sender.riemann.event(
+        service='process:{name}:io:read_bytes'.format(**data),
+        metric_f=io_counters.read_bytes)
+    sender.riemann.event(
+        service='process:{name}:io:write_bytes'.format(**data),
+        metric_f=io_counters.write_bytes)
 
 
 def state(sender, process, data):

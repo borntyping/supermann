@@ -62,11 +62,14 @@ def main():
     self.connect(supermann.signals.event, supermann.metrics.system.mem)
     self.connect(supermann.signals.event, supermann.metrics.system.swap)
     self.connect(supermann.signals.event, supermann.metrics.system.load)
+    self.connect(supermann.signals.event, supermann.metrics.system.load_scaled)
+    self.connect(supermann.signals.event, supermann.metrics.system.uptime)
 
     # Collect metrics for each process when an event is recived
     self.connect(supermann.signals.process, supermann.metrics.process.cpu)
     self.connect(supermann.signals.process, supermann.metrics.process.mem)
     self.connect(supermann.signals.process, supermann.metrics.process.fds)
+    self.connect(supermann.signals.process, supermann.metrics.process.io)
     self.connect(supermann.signals.process, supermann.metrics.process.state)
     self.connect(supermann.signals.process, supermann.metrics.process.uptime)
 
