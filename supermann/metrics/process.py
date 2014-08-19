@@ -24,27 +24,27 @@ def running_process(function):
 def cpu(sender, process, data):
     sender.riemann.event(
         service='process:{name}:cpu:percent'.format(**data),
-        metric_f=process.get_cpu_percent(interval=None))
+        metric_f=process.cpu_percent(interval=None))
     sender.riemann.event(
         service='process:{name}:cpu:absolute'.format(**data),
-        metric_f=sum(process.get_cpu_times()))
+        metric_f=sum(process.cpu_times()))
 
 
 @running_process
 def mem(sender, process, data):
     sender.riemann.event(
         service='process:{name}:mem:percent'.format(name=data['name']),
-        metric_f=process.get_memory_percent())
+        metric_f=process.memory_percent())
     sender.riemann.event(
         service='process:{name}:mem:absolute'.format(name=data['name']),
-        metric_f=process.get_memory_info()[0])
+        metric_f=process.memory_info()[0])
 
 
 @running_process
 def fds(sender, process, data):
     sender.riemann.event(
         service='process:{name}:fds'.format(**data),
-        metric_f=process.get_num_fds())
+        metric_f=process.num_fds())
 
 
 def state(sender, process, data):

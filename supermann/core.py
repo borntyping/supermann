@@ -28,7 +28,7 @@ class Supermann(object):
         process = psutil.Process(os.getpid())
         self.log.info("This looks like a job for Supermann!")
         self.log.debug("Supermann process PID is: {0}".format(process.pid))
-        self.log.debug("Parent process PID is: {0}".format(process.parent.pid))
+        self.log.debug("Parent process PID is: {0}".format(process.ppid))
 
         # The Supervisor listener and client take their configuration from
         # the environment variables provided by Supervisor
