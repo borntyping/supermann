@@ -16,12 +16,3 @@ supermann.metrics.system
     :members:
     :undoc-members:
     :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: supermann.metrics
-    :members:
-    :undoc-members:
-    :show-inheritance:
