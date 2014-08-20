@@ -37,8 +37,9 @@ def load(self, event):
 
 
 def load_scaled(self, event):
+    """Load average divided by number of CPUs"""
     load1 = os.getloadavg()[0] / psutil.cpu_count()
-    self.riemann.event(service='system:load:scaled:1min', metric_f=load1)
+    self.riemann.event(service='system:load_scaled:1min', metric_f=load1)
 
 
 def uptime(self, event):
