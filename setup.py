@@ -18,16 +18,17 @@ setuptools.setup(
     packages = setuptools.find_packages(),
 
     install_requires = [
-        'argparse>=1.1',
-        'blinker>=1.1',
-        'psutil>=2.1.1',
-        'riemann-client>=5.0.0',
-        'supervisor>=3.0',
+        'blinker>=1.1,<2.0',
+        'click>=3.1,<4.0',
+        'psutil>=2.1.1,<3.0.0',
+        'riemann-client>=5.0.0,<6.0.0',
+        'supervisor>=3.0,<4.0'
     ],
 
     entry_points = {
         'console_scripts': [
-            'supermann = supermann.command:main'
+            'supermann = supermann.cli:main',
+            'supermann-from-file = supermann.cli:from_file'
         ]
     },
 

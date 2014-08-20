@@ -4,8 +4,7 @@ import datetime
 import time
 import os
 
-from supermann import Supermann, signals
-from supermann.metrics import system, process
+from supermann import Supermann
 from supermann.supervisor import Event
 
 import mock
@@ -47,7 +46,7 @@ def getAllProcessInfo():
 @mock.patch('supermann.supervisor.Supervisor', autospec=True)
 @mock.patch('riemann_client.transport.TCPTransport', autospec=True)
 def supermann_instance(riemann_client_class, supervisor_class):
-    instance = Supermann(None, None)
+    instance = Supermann(None, None).with_all_recivers()
     instance.supervisor.configure_mock(**{
         # At least one process must be visible for the process metrics to run
         'rpc.getAllProcessInfo': mock.Mock(wraps=getAllProcessInfo),
@@ -56,26 +55,8 @@ def supermann_instance(riemann_client_class, supervisor_class):
         'run_forever.return_value': [Event({}, {}), Event({}, {})]
     })
 
-    # System metrics
-    instance.connect(signals.event, system.cpu)
-    instance.connect(signals.event, system.swap)
-    instance.connect(signals.event, system.mem)
-    instance.connect(signals.event, system.load)
-    instance.connect(signals.event, system.load_scaled)
-    instance.connect(signals.event, system.uptime)
-
-    # Process metrics
-    instance.connect(signals.process, process.cpu)
-    instance.connect(signals.process, process.mem)
-    instance.connect(signals.process, process.fds)
-    instance.connect(signals.process, process.io)
-    instance.connect(signals.process, process.state)
-    instance.connect(signals.process, process.uptime)
-
     # 'Run' Supermann using the events in the Supervisor mock
-    instance.run()
-
-    return instance
+    return instance.run()
 
 
 def test_riemann_client(supermann_instance):

@@ -49,6 +49,33 @@ class Supermann(object):
         """Connects a signal that will recive messages from this instance"""
         return signal.connect(reciver, sender=self)
 
+    def connect_event(self, reciver):
+        return self.connect(supermann.signals.event, reciver)
+
+    def connect_process(self, reciver):
+        return self.connect(supermann.signals.process, reciver)
+
+    def with_all_recivers(self):
+        """Adds all recivers to the Supermann instance"""
+
+        # Collect system metrics when an event is received
+        self.connect_event(supermann.metrics.system.cpu)
+        self.connect_event(supermann.metrics.system.mem)
+        self.connect_event(supermann.metrics.system.swap)
+        self.connect_event(supermann.metrics.system.load)
+        self.connect_event(supermann.metrics.system.load_scaled)
+        self.connect_event(supermann.metrics.system.uptime)
+
+        # Collect metrics for each process when an event is recived
+        self.connect_process(supermann.metrics.process.cpu)
+        self.connect_process(supermann.metrics.process.mem)
+        self.connect_process(supermann.metrics.process.fds)
+        self.connect_process(supermann.metrics.process.io)
+        self.connect_process(supermann.metrics.process.state)
+        self.connect_process(supermann.metrics.process.uptime)
+
+        return self
+
     def run(self):
         """Runs forever, ensuring Riemann is disconnected properly"""
         with self.riemann:
@@ -59,6 +86,7 @@ class Supermann(object):
                 self.emit_processes(event=event)
                 # Send the queued events at the end of the cycle
                 self.riemann.flush()
+        return self
 
     def exception_handler(self, *exc_info):
         """Ensures exceptions are logged"""
