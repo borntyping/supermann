@@ -1,10 +1,8 @@
 """Process metrics"""
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals, division
 
 import functools
-
-import psutil
 
 import supermann.utils
 
@@ -20,6 +18,14 @@ def running_process(function):
         else:
             return function(sender, process, data)
     return wrapper
+
+
+def get_nofile_limit(pid):
+    with open('/proc/%s/limits' % pid, 'r') as f:
+        for line in f:
+            if line.startswith('Max open files'):
+                return int(line.split()[4])
+    raise Exception('Could not find "Max open files" limit')
 
 
 @running_process
@@ -52,6 +58,9 @@ def fds(sender, process, data):
     sender.riemann.event(
         service='process:{name}:fds:absolute'.format(**data),
         metric_f=num_fds)
+    sender.riemann.event(
+        service='process:{name}:fds:percent'.format(**data),
+        metric_f=(num_fds / get_nofile_limit(process.pid)) * 100)
 
 
 @running_process
