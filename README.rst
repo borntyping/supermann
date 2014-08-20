@@ -2,50 +2,71 @@
 Supermann
 =========
 
-.. image:: https://pypip.in/v/supermann/badge.png
+.. image:: http://img.shields.io/pypi/v/supermann.svg?style=flat-square
     :target: https://pypi.python.org/pypi/supermann
 
-.. image:: https://travis-ci.org/borntyping/supermann.png?branch=master
+.. image:: http://img.shields.io/pypi/l/supermann.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/supermann
+
+.. image:: http://img.shields.io/travis/borntyping/supermann/master.svg?style=flat-square
     :target: https://travis-ci.org/borntyping/supermann
+
+|
 
 Supermann monitors processes running under `Supervisor <http://supervisord.org/>`_ and sends metrics to `Riemann <http://riemann.io/>`_.
 
 Usage
 -----
 
-Supermann runs as a Supervisor event listener, and will send metrics every time an event is received.
+Supermann runs as a Supervisor event listener, and will send metrics every time an event is received. The only configuration Supermann needs is the host and port for a Riemann instance, which can be provided as arguments or by the ``RIEMANN_HOST`` and ``RIEMANN_PORT`` environment variables.
 
-A very basic Supervisor configuration section to run Supermann::
+Basic usage is as follows, though Supermann will not start if not run under Supervisor::
+
+    supermann [--log-level=LEVEL] HOST PORT
+
+A Supervisor configuration file for Supermann should look something like this::
 
     [eventlistener:supermann]
-    command=supermann localhost 5555
+    command=supermann-from-file /etc/supermann.args
     events=PROCESS_STATE,TICK_5
 
-Listening for the ``PROCESS_STATE`` and ``TICK_5`` events will send metrics every 5 seconds, and when a program changes state. See the `Supervisor event documentation <http://supervisord.org/events.html>`_ for more information. Supermann is designed to bail out when an error is encountered, allowing Supervisor to restart it - it is recommended that you do not set ``autorestart=false`` in the Supervisor configuration for the eventlistener. Supervisor logs to ``stderr``, which is logged by Supervisor. The logs can be read with ``supervisorctl tail supermann stderr`` or finding the log in Supervisor's log directory.
+This loads Supermann's arguments from ``/etc/supermann.args``, which would contain a host and port for a Riemann server - ``localhost:5555`` is used as the default if no host or port are specified::
 
-``supermann --help`` will display usage information on the available arguments. Basic usage is::
+    riemann.example.com 5555
 
-    supermann [--log-level=INFO] [--memmon <name>=<limit>] $RIEMANN_HOST $RIEMANN_PORT
+What Supermann does
+^^^^^^^^^^^^^^^^^^^
 
-The ``--memmon`` option takes the name of a Supervisor program, and a memory limit in bytes. The suffixes ``gb``, ``mb`` and ``kb`` can be used, and are case insensitive. This option can be repeated any number of times.
+Supermann will collect and send information about the system and the processes running under Supervisor each time an event is received. Listening for the ``TICK_5`` and ``PROCESS_STATE`` events will collect and send information every 5 seconds, and when a program changes state. See the `Supervisor event documentation <http://supervisord.org/events.html>`_ for more information.
+
+Supermann is designed to bail out when an error is encountered, allowing Supervisor to restart it - it is recommended that you do not set ``autorestart=false`` in the Supervisor configuration for the event listener. Logs are sent to ``STDERR`` for collection by Supervisor - the log level can be controlled with the ``--log-level`` argument. The logs can be read with ``supervisorctl tail supermann stderr`` or finding the log in Supervisor's log directory.
+
+``supermann-from-file``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+An issue with modifying the configuration of a Supervisord event listener (`link <https://github.com/Supervisor/supervisor/issues/339>`_) means that the command used to start an event listener process can't be changed while Supervisord is running.
+
+Supermann 2 allowed files to be named directly as an argument that more arguments would be read from. Supermann 3 instead provides the ``supermann-from-file`` entry point, which loads a file containing arguments that will be passed to the main ``supermann`` command.
+
+The easiest way to upgrade between versions is to rename the ``eventlistener:supermann`` section in the Supervisord configuration, and to then run ``supervisorctl update``. This will remove the old supermann instance, and start a new instance with the new command. The ``supermann-from-file`` command reads a set of arguments from a file and starts Supermann with those arguments, so that Supermann's configuration can be changed without restarting Supervisord.
 
 Installation
 ------------
 
-Supermann can be installed with ``pip install supermann``, or you can use the provided makefile to build and distribute an RPM using [fpm](https://github.com/jordansissel/fpm).
+Supermann can be installed with ``pip install supermann``. It's recommended to install it in the same Python environment as Supervisor.
 
 Supervisor can also be installed with ``pip``, or can be installed from your distributions package manager. Once Supermann is installed, add an ``eventlistener`` section to the Supervisor configuration (``/etc/supervisord.conf`` by default) and restart Supervisor.
 
 Requirements
 ^^^^^^^^^^^^
 
-* `argparse <https://pypi.python.org/pypi/argparse>`_
-* `protobuf <https://pypi.python.org/pypi/protobuf>`_
+* `click <https://pypi.python.org/pypi/click>`_
 * `psutil <https://pypi.python.org/pypi/psutil>`_
 * `riemann-client <https://pypi.python.org/pypi/riemann-client>`_
+* `protobuf <https://pypi.python.org/pypi/protobuf>`_
 * `supervisor <https://pypi.python.org/pypi/supervisor>`__
 
-The psutil package uses C extensions, and installing the package from source or with a python package manager (such as ``pip``) will require build tools. Alternatively, it can be installed from your distribution's repositories (``python-psutil`` on Debian and CentOS). Superman currently uses a very old version of psutil so as to remain compatible with CentOS.
+The ``psutil`` package uses C extensions, and installing the package from source or with a python package manager (such as ``pip``) will require build tools. Alternatively, it can be installed from your distribution's repositories (``python-psutil`` on Debian and CentOS). Superman currently uses a very old version of ``psutil`` so as to remain compatible with CentOS.
 
 Supermann is developed and tested on Python 2.6. There are no plans to release it for Python 3, as Google's ``protobuf`` library (and therefore ``riemann-client``) are only compatible with Python 2.
 

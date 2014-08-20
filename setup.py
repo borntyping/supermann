@@ -14,6 +14,7 @@ setuptools.setup(
     url = "https://github.com/borntyping/supermann",
     description = "A Supervisor event listener for Riemann",
     long_description = open('README.rst').read(),
+    license="MIT",
 
     packages = setuptools.find_packages(),
 
