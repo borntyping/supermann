@@ -49,13 +49,9 @@ def mem(sender, process, data):
 @running_process
 def fds(sender, process, data):
     num_fds = process.num_fds()
-    rlimit_fds = process.rlimit(psutil.RLIMIT_NOFILE)[1]
     sender.riemann.event(
         service='process:{name}:fds:absolute'.format(**data),
         metric_f=num_fds)
-    sender.riemann.event(
-        service='process:{name}:fds:percent'.format(**data),
-        metric_f=(num_fds / rlimit_fds))
 
 
 @running_process
