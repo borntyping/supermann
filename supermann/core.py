@@ -16,7 +16,12 @@ import supermann.supervisor
 
 
 class Supermann(object):
-    """The main Supermann process"""
+    """Manages the components that make up a Supermann instance.
+
+    Manages a the Supervisor and Riemann clients, and distributes events to the
+    :py:data:`supermann.signals.event` and :py:data:`supermann.signals.process`
+    signals.
+    """
 
     def __init__(self, host=None, port=None):
         self.actions = collections.defaultdict(list)
@@ -46,17 +51,26 @@ class Supermann(object):
         sys.excepthook = self.exception_handler
 
     def connect(self, signal, reciver):
-        """Connects a signal that will recive messages from this instance"""
+        """Connects a signal that will recive messages from this instance
+
+        :param blinker.Signal signal: Listen for events from this signal
+        :param reciver: A function that will recive events
+        """
         return signal.connect(reciver, sender=self)
 
     def connect_event(self, reciver):
+        """Conects a reciver to ``event`` using :py:meth:`.connect`"""
         return self.connect(supermann.signals.event, reciver)
 
     def connect_process(self, reciver):
+        """Conects a reciver to ``process`` using :py:meth:`.connect`"""
         return self.connect(supermann.signals.process, reciver)
 
     def with_all_recivers(self):
-        """Adds all recivers to the Supermann instance"""
+        """Adds all recivers to the Supermann instance
+
+        :returns: the Supermann instance the method was called on
+        """
 
         # Collect system metrics when an event is received
         self.connect_event(supermann.metrics.system.cpu)
@@ -77,7 +91,10 @@ class Supermann(object):
         return self
 
     def run(self):
-        """Runs forever, ensuring Riemann is disconnected properly"""
+        """Runs forever, ensuring Riemann is disconnected properly
+
+        :returns: the Supermann instance the method was called on
+        """
         with self.riemann:
             for event in self.supervisor.run_forever():
                 # Emit a signal for each event
@@ -89,7 +106,7 @@ class Supermann(object):
         return self
 
     def exception_handler(self, *exc_info):
-        """Ensures exceptions are logged"""
+        """Used as a global exception handler to ensure errors are logged"""
         self.log.error("A fatal exception occurred:", exc_info=exc_info)
 
     def emit_processes(self, event):
@@ -97,6 +114,8 @@ class Supermann(object):
 
         A new cache is created from the processes emitted in this cycle, which
         drops processes that no longer exist from the cache.
+
+        :param event: An event received from Supervisor
         """
         cache = dict()
 
@@ -107,6 +126,7 @@ class Supermann(object):
                 data['name'], pid))
             supermann.signals.process.send(self, process=cache[pid], data=data)
 
+        # The cache is stored for use in _get_process and the next call
         self.process_cache = cache
 
     def _get_process(self, pid):
@@ -120,6 +140,9 @@ class Supermann(object):
         stores state. When get_cpu_percent is next called, it returns the CPU
         utilisation since the last call - creating a new instance each cycle
         breaks this.
+
+        :returns: A process from the cache or None
+        :rtype: psutil.Process
         """
         if pid == 0:
             return None

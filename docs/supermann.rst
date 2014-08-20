@@ -1,6 +1,11 @@
 supermann package
 =================
 
+.. automodule:: supermann
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 supermann.cli
 -------------
 
@@ -8,6 +13,18 @@ supermann.cli
     :members:
     :undoc-members:
     :show-inheritance:
+
+    .. data:: main
+
+        The main entry point - see ``supermann --help`` for more information.
+
+    .. data:: from_file
+
+        An alternate entry point - see ``supermann-from-file --help`` for more
+        information.
+
+        Used as a workaround for `an issue with Supervisor
+        <https://github.com/Supervisor/supervisor/issues/339>`_.
 
 supermann.core
 --------------
@@ -37,15 +54,6 @@ supermann.utils
 ---------------
 
 .. automodule:: supermann.utils
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: supermann
     :members:
     :undoc-members:
     :show-inheritance:
