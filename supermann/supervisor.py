@@ -76,7 +76,7 @@ class Supervisor(object):
         self.log = supermann.utils.getLogger(self)
 
         if 'SUPERVISOR_SERVER_URL' not in os.environ:
-            raise Exception("SUPERVISOR_SERVER_URL is not set!")
+            raise RuntimeError("SUPERVISOR_SERVER_URL is not set!")
         self.log.info("Using Supervisor XML-RPC interface at {0}".format(
             os.environ['SUPERVISOR_SERVER_URL']))
 

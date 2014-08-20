@@ -25,7 +25,7 @@ def get_nofile_limit(pid):
         for line in f:
             if line.startswith('Max open files'):
                 return int(line.split()[4])
-    raise Exception('Could not find "Max open files" limit')
+    raise RuntimeError('Could not find "Max open files" limit')
 
 
 @running_process
