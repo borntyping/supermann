@@ -1,14 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
+import os.path
+
 import click.testing
 import mock
 
 import supermann.cli
 
 
-def main(args=[], env=None):
+def main(args=[], env=None, command=supermann.cli.main):
     runner = click.testing.CliRunner()
-    result = runner.invoke(supermann.cli.main, args, env=env)
+    result = runner.invoke(command, args, env=env)
     print result.output
     assert result.exit_code == 0
     return result
@@ -43,3 +45,10 @@ class TestCLI(object):
     def test_log_level(self, configure_logging, supermann_cls):
         main(['--log-level', 'WARNING'])
         configure_logging.assert_called_with('WARNING')
+
+    @mock.patch('supermann.utils.configure_logging')
+    def test_from_file(self, configure_logging, supermann_cls):
+        path = os.path.join(os.path.dirname(__file__), 'supermann.args')
+        main([path], command=supermann.cli.from_file)
+        configure_logging.assert_called_with('DEBUG')
+        supermann_cls.assert_called_with('example.com', 6666)

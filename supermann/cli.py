@@ -31,4 +31,4 @@ def main(log_level, host, port):
 @click.command()
 @click.argument('config', type=click.File('r'))
 def from_file(config):
-    click.invoke(main, 'supermann', config.read().split())
+    main.main(args=config.read().split())
