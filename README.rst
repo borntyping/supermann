@@ -15,6 +15,10 @@ Supermann
 
 Supermann monitors processes running under `Supervisor <http://supervisord.org/>`_ and sends metrics to `Riemann <http://riemann.io/>`_.
 
+* `Source on GitHub <https://github.com/borntyping/supermann>`_
+* `Documentation on Read the Docs <http://supermann.readthedocs.org/en/latest/>`_
+* `Packages on PyPI <https://pypi.python.org/pypi/supermann>`_
+
 Usage
 -----
 
