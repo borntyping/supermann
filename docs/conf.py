@@ -14,7 +14,7 @@ exclude_patterns = ['_build']
 project = u'Supermann'
 copyright = u'2014, Sam Clements'
 version = '3.0.0'
-release = '3.0.0-dev'
+release = '3.0.0'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
