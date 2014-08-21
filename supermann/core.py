@@ -10,7 +10,8 @@ import psutil
 import riemann_client.client
 import riemann_client.transport
 
-import supermann.metrics
+import supermann.metrics.process
+import supermann.metrics.system
 import supermann.signals
 import supermann.supervisor
 
