@@ -1,11 +1,6 @@
 supermann package
 =================
 
-.. automodule:: supermann
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 supermann.cli
 -------------
 
