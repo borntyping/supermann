@@ -74,6 +74,20 @@ The ``psutil`` package uses C extensions, and installing the package from source
 
 Supermann is developed and tested on Python 2.6. There are no plans to release it for Python 3, as Google's ``protobuf`` library (and therefore ``riemann-client``) are only compatible with Python 2.
 
+Changelog
+---------
+
+Version 3.0.0
+^^^^^^^^^^^^^
+
+* Upgraded to most recent version of ``psutil`` (``2.1.1``)
+* Replaced or changed various metrics
+* Replaced ``argparse`` with ``click`` and made improvements to CLI
+* Replaced ``@file`` argument syntax with ``supermann-from-file``
+* Removed ``--memmon`` option and memory monitoring plugin
+* Added documentation on `Read the Docs <http://supermann.readthedocs.org/en/latest/>`_
+* Many other minor fixes and improvements
+
 Licence
 -------
 
