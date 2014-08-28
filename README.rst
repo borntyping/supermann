@@ -64,11 +64,13 @@ Supervisor can also be installed with ``pip``, or can be installed from your dis
 Requirements
 ^^^^^^^^^^^^
 
-* `click <https://pypi.python.org/pypi/click>`_
-* `psutil <https://pypi.python.org/pypi/psutil>`_
-* `riemann-client <https://pypi.python.org/pypi/riemann-client>`_
+* `click <http://click.pocoo.org/>`_
+* `blinker <https://pythonhosted.org/blinker/>`_
 * `protobuf <https://pypi.python.org/pypi/protobuf>`_
-* `supervisor <https://pypi.python.org/pypi/supervisor>`__
+* `psutil <http://pythonhosted.org/psutil/>`_
+* `riemann-client <http://riemann-client.readthedocs.org/>`_
+* `supervisor <http://supervisord.org/>`_
+
 
 The ``psutil`` package uses C extensions, and installing the package from source or with a python package manager (such as ``pip``) will require build tools. Alternatively, it can be installed from your distribution's repositories (``python-psutil`` on Debian and CentOS). Superman currently uses a very old version of ``psutil`` so as to remain compatible with CentOS.
 
