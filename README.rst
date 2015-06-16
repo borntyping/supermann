@@ -2,13 +2,13 @@
 Supermann
 =========
 
-.. image:: http://img.shields.io/pypi/v/supermann.svg?style=flat-square
+.. image:: http://img.shields.io/pypi/v/supermann.svg
     :target: https://pypi.python.org/pypi/supermann
 
-.. image:: http://img.shields.io/pypi/l/supermann.svg?style=flat-square
+.. image:: http://img.shields.io/pypi/l/supermann.svg
     :target: https://pypi.python.org/pypi/supermann
 
-.. image:: http://img.shields.io/travis/borntyping/supermann/master.svg?style=flat-square
+.. image:: http://img.shields.io/travis/borntyping/supermann/master.svg
     :target: https://travis-ci.org/borntyping/supermann
 
 |
@@ -70,7 +70,6 @@ Requirements
 * `psutil <http://pythonhosted.org/psutil/>`_
 * `riemann-client <http://riemann-client.readthedocs.org/>`_
 * `supervisor <http://supervisord.org/>`_
-
 
 The ``psutil`` package uses C extensions, and installing the package from source or with a python package manager (such as ``pip``) will require build tools. Alternatively, it can be installed from your distribution's repositories (``python-psutil`` on Debian and CentOS). Superman currently uses a very old version of ``psutil`` so as to remain compatible with CentOS.
 
