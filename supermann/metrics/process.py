@@ -4,6 +4,8 @@ from __future__ import absolute_import, unicode_literals, division
 
 import functools
 
+import psutil
+
 import supermann.utils
 
 
@@ -86,18 +88,27 @@ def fds(sender, process, data):
 
 @running_process
 def io(sender, process, data):
-    """Bytes read and written by a process
+    """Bytes read and written by a process.
+
+    If ``/proc/[pid]/io`` is not availible (i.e. you are running Supermann
+    inside an unprivileged Docker container), the events will have set
+    ``metric_f`` to 0 and ``state`` to ``access denied``.
 
     - ``process:{name}:io:read:bytes``
     - ``process:{name}:io:write:bytes``
     """
-    io_counters = process.io_counters()
+    try:
+        io_counters = process.io_counters()
+    except psutil.AccessDenied:
+        read_bytes = write_bytes = dict(state="access denied")
+    else:
+        read_bytes = dict(metric_f=io_counters.read_bytes)
+        write_bytes = dict(metric_f=io_counters.write_bytes)
+
     sender.riemann.event(
-        service='process:{name}:io:read:bytes'.format(**data),
-        metric_f=io_counters.read_bytes)
+        service='process:{name}:io:read:bytes'.format(**data), **read_bytes)
     sender.riemann.event(
-        service='process:{name}:io:write:bytes'.format(**data),
-        metric_f=io_counters.write_bytes)
+        service='process:{name}:io:write:bytes'.format(**data), **write_bytes)
 
 
 def state(sender, process, data):
