@@ -68,12 +68,15 @@ class Supermann(object):
         return self.connect(supermann.signals.process, reciver)
 
     def with_all_recivers(self):
-        """Adds all recivers to the Supermann instance
+        self.connect_system_metrics()
+        self.connect_process_metrics()
+        return self
+
+    def connect_system_metrics(self):
+        """Collect system metrics when an event is received
 
         :returns: the Supermann instance the method was called on
         """
-
-        # Collect system metrics when an event is received
         self.connect_event(supermann.metrics.system.cpu)
         self.connect_event(supermann.metrics.system.mem)
         self.connect_event(supermann.metrics.system.swap)
@@ -81,7 +84,11 @@ class Supermann(object):
         self.connect_event(supermann.metrics.system.load_scaled)
         self.connect_event(supermann.metrics.system.uptime)
 
-        # Collect metrics for each process when an event is recived
+    def connect_process_metrics(self):
+        """Collect metrics for each process when an event is received
+
+        :returns: the Supermann instance the method was called on
+        """
         self.connect_process(supermann.metrics.process.cpu)
         self.connect_process(supermann.metrics.process.mem)
         self.connect_process(supermann.metrics.process.fds)
