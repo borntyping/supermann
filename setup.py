@@ -19,10 +19,10 @@ setuptools.setup(
     packages = setuptools.find_packages(),
 
     install_requires = [
-        'blinker>=1.1,<2.0',
-        'click>=3.1,<4.0',
-        'psutil>=2.1.1,<3.0.0',
-        'riemann-client>=5.0.0,<6.0.0',
+        'blinker>=1.1',
+        'click>=6.6',
+        'psutil>=4.3.0',
+        'riemann-client>=6.3.0',
         'supervisor>=3.0,<4.0'
     ],
 

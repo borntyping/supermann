@@ -58,13 +58,13 @@ def mem(sender, process, data):
     - ``process:{name}:mem:rss:absolute``
     - ``process:{name}:mem:rss:percent``
     """
-    rss, vms = process.memory_info()
+    memory_info = process.memory_info()
     sender.riemann.event(
         service='process:{name}:mem:virt:absolute'.format(name=data['name']),
-        metric_f=vms)
+        metric_f=memory_info.vms)
     sender.riemann.event(
         service='process:{name}:mem:rss:absolute'.format(name=data['name']),
-        metric_f=rss)
+        metric_f=memory_info.rss)
     sender.riemann.event(
         service='process:{name}:mem:rss:percent'.format(name=data['name']),
         metric_f=process.memory_percent())
