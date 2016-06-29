@@ -16,7 +16,7 @@ def main(args=[], env=None, command=supermann.cli.main):
     return result
 
 
-@mock.patch('supermann.core.Supermann')
+@mock.patch('supermann.core.Supermann', autospec=True)
 class TestCLI(object):
     def test_main_with_all(self, supermann_cls):
         main(['--log-level', 'INFO', 'localhost', '5555'])
@@ -33,6 +33,14 @@ class TestCLI(object):
     def test_main_without_args(self, supermann_cls):
         main()
         supermann_cls.assert_called_with('localhost', 5555)
+
+    def test_system_flag(self, supermann_cls):
+        main(['--system'])
+        assert supermann_cls.return_value.connect_system_metrics.called
+
+    def test_no_system_flag(self, supermann_cls):
+        main(['--no-system'])
+        assert not supermann_cls.return_value.connect_system_metrics.called
 
     def test_main_with_env(self, supermann_cls):
         main(env={
