@@ -1,6 +1,6 @@
 """A Supervisor event listener for Riemann"""
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
 from supermann.core import Supermann
 

@@ -1,6 +1,6 @@
 """Blinker signals used for sending end receiving events"""
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
 import blinker
 

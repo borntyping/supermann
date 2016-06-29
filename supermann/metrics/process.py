@@ -1,6 +1,6 @@
 """Metrics reported for each process running under Supervisor"""
 
-from __future__ import absolute_import, unicode_literals, division
+from __future__ import absolute_import, division
 
 import functools
 
