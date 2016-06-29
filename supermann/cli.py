@@ -15,7 +15,7 @@ import supermann.utils
     type=click.Choice(supermann.utils.LOG_LEVELS.keys()),
     help="One of CRITICAL, ERROR, WARNING, INFO, DEBUG.")
 @click.option(
-    '-s', '--system', type=click.BOOL, default=True,
+    '--system/--no-system', default=True,
     help='Enable or disable system metrics.')
 @click.argument(
     'host', type=click.STRING, default='localhost', envvar='RIEMANN_HOST')
